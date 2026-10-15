@@ -1,6 +1,6 @@
 # Chat Model Catalog
 
-Snapshot of the serverless catalog as of 2026-10-07. Serverless availability changes often; a
+Snapshot of the serverless catalog as of 2026-10-15. Serverless availability changes often; a
 model that drops off returns `Unable to access non-serverless model`. To confirm a chat model,
 send one request with `max_tokens=1`; check the
 [deprecations page](https://docs.together.ai/docs/deprecations) for retired models and their
@@ -54,6 +54,7 @@ structured outputs are supported.
 | Qwen | Qwen3.6 Plus | `Qwen/Qwen3.6-Plus` | 1,000,000 | 0.50 / 3.00 | - | - |
 | Qwen | Qwen3.8 Flash | `Qwen/Qwen3.8-Flash` | 1,000,000 | 0.09 / 0.282 | - | - |
 | Meta | Muse Glimmer 30B | `meta-models/Muse-Glimmer-30B` | 131,072 | 0.35 / 1.50 | - | - |
+| Meta | Muse Spark Open 816B A42B | `meta-models/Muse-Spark-Open-816B-A42B` | 1,048,576 | 1.25 / 4.25 | Yes | Yes |
 | Prism ML | Ternary Bonsai 27B | `Prism-ML/Ternary-Bonsai-27B` | 262,144 | free | - | - |
 | Together AI | Tev1 4B Experimental | `together/Tev1-4B-experimental` | 32,768 | 0.042 / free | - | - |
 
