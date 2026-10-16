@@ -507,7 +507,7 @@ console.log(`Title: ${result.title}`);
 
 ## Supported Models
 
-Serverless models that support this as of 2026-10-07, per the [serverless catalog](https://docs.together.ai/docs/serverless/models). Availability changes; a request with `max_tokens=1` confirms a model is live.
+Serverless models that support this as of 2026-10-16, per the [serverless catalog](https://docs.together.ai/docs/serverless/models). Availability changes; a request with `max_tokens=1` confirms a model is live.
 
 - `moonshotai/Kimi-K3`
 - `zai-org/GLM-5.3`
@@ -521,6 +521,7 @@ Serverless models that support this as of 2026-10-07, per the [serverless catalo
 - `Qwen/Qwen3.5-9B`
 - `openai/gpt-oss-120b`
 - `meta-llama/Llama-3.3-70B-Instruct-Turbo`
+- `reflection/Beam-1.0-501B-A23B`
 
 ## Troubleshooting
 
