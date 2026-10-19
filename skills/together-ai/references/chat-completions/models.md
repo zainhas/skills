@@ -1,6 +1,6 @@
 # Chat Model Catalog
 
-Snapshot of the serverless catalog as of 2026-10-07. Serverless availability changes often; a
+Snapshot of the serverless catalog as of 2026-10-18. Serverless availability changes often; a
 model that drops off returns `Unable to access non-serverless model`. To confirm a chat model,
 send one request with `max_tokens=1`; check the
 [deprecations page](https://docs.together.ai/docs/deprecations) for retired models and their
@@ -43,6 +43,7 @@ structured outputs are supported.
 | DeepSeek | DeepSeek V4 Pro 0813 | `deepseek-ai/DeepSeek-V4-Pro-0813` | 1,048,576 | 1.32 / 3.96 | Yes | Yes |
 | DeepSeek | DeepSeek V4 Flash 0731 | `deepseek-ai/DeepSeek-V4-Flash-0731` | 1,048,576 | 0.14 / 0.28 | Yes | Yes |
 | DeepSeek | DeepSeek V4.1 Flash | `deepseek-ai/DeepSeek-V4.1-Flash` | 1,000,000 | 0.30 / 1.20 | Yes | Yes |
+| DeepSeek | DeepSeek V4.1 Flash 1017 | `deepseek-ai/DeepSeek-V4.1-Flash-1017` | 1,000,000 | 0.30 / 1.20 | Yes | Yes |
 | Thinking Machines | Inkling | `thinkingmachines/Inkling` | 524,288 | 1.00 / 4.05 | Yes | Yes |
 | MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 | 0.30 / 1.20 | Yes | Yes |
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 | 0.17 / 0.25 | Yes | Yes |
