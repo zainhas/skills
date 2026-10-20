@@ -53,6 +53,7 @@ Available on every command:
 | `--json` | Return the response as JSON. Useful for scripting. |
 | `--non-interactive` | Disable interactive prompts. Required in CI/CD. |
 | `--api-key [string]` | Together API key. Falls back to `TOGETHER_API_KEY`. |
+| `--project [string]` | Project ID. Falls back to `TOGETHER_PROJECT_ID`. Required when requesting preemptible GPUs. |
 | `--timeout [number]` | Request timeout, in seconds. |
 | `--max-retries [number]` | Maximum number of HTTP retries. |
 | `--debug` | Enable debug logging. |
@@ -81,6 +82,7 @@ tg beta clusters create [OPTIONS]
 | `--nvidia-driver-version` | string | NVIDIA driver version (use `clusters list-regions` for options) |
 | `--cuda-version` | string | CUDA version (use `clusters list-regions` for options) |
 | `--cluster-type` | enum | `KUBERNETES` or `SLURM` |
+| `--num-preemptible-gpus` | number | Preemptible GPU target (multiple of 8). Requires `--project` when greater than 0. |
 | `--volume` | string | Existing storage volume ID to attach |
 | `--non-interactive` | -- | Skip interactive prompts. Required in CI. |
 | `--json` | -- | Output in JSON format |
@@ -99,6 +101,20 @@ tg beta clusters create \
   --billing-type ON_DEMAND \
   --cluster-type KUBERNETES \
   --non-interactive
+
+# On-demand cluster with preemptible capacity (project required)
+tg beta clusters create \
+  --name my-preemptible-cluster \
+  --num-gpus 8 \
+  --num-preemptible-gpus 8 \
+  --gpu-type H100_SXM \
+  --region us-central-8 \
+  --cuda-version 12.8 \
+  --nvidia-driver-version 570 \
+  --billing-type ON_DEMAND \
+  --cluster-type KUBERNETES \
+  --project PROJECT_ID \
+  --non-interactive --json
 
 # Reserved Slurm cluster with H200s and attached storage
 tg beta clusters create \
@@ -144,6 +160,7 @@ tg beta clusters update [CLUSTER_ID] [OPTIONS]
 | Flag | Type | Description |
 |------|------|-------------|
 | `--num-gpus` | number | New GPU count (must be a multiple of 8) |
+| `--num-preemptible-gpus` | number | Preemptible GPU target (multiple of 8). Omit to keep the current value. |
 | `--cluster-type` | enum | `KUBERNETES` or `SLURM` |
 | `--json` | -- | Output in JSON format |
 
@@ -152,6 +169,9 @@ tg beta clusters update [CLUSTER_ID] [OPTIONS]
 ```shell
 # Scale up to 16 GPUs
 tg beta clusters update [CLUSTER_ID] --num-gpus 16
+
+# Raise the preemptible target
+tg beta clusters update [CLUSTER_ID] --num-preemptible-gpus 16
 
 # Switch to Slurm
 tg beta clusters update [CLUSTER_ID] --cluster-type SLURM

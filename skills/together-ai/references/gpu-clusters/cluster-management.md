@@ -7,6 +7,7 @@
   - [Startup Scripts (Slinky v1.0 only)](#startup-scripts-slinky-v10-only)
 - [GPU Access in Containers](#gpu-access-in-containers)
 - [Scaling](#scaling)
+- [Preemptible Compute](#preemptible-compute)
 - [Storage](#storage)
 - [Health Checks](#health-checks)
 - [User Management](#user-management)
@@ -251,6 +252,79 @@ sudo scontrol update NodeName=<node_name> State=drain Reason="scaling down"
 ### Combining Capacity
 
 Use reserved for baseline + on-demand for bursts.
+
+## Preemptible Compute
+
+Public preview for Kubernetes and Slurm. Preemptible nodes join the same cluster as
+standard nodes (not a separate cluster type). Every cluster still needs at least one
+standard node (`num_gpus`). Counts are multiples of 8. Targets are not guaranteed;
+nodes can be reclaimed at any time (about five minutes drain).
+
+| Surface | Standard | Preemptible |
+|---------|----------|-------------|
+| Kubernetes label | `together.ai/compute-class=non-preemptible` | `together.ai/compute-class=preemptible` |
+| Node name hint | `gpu-dp` | `gpu-preemptible-dp` |
+| Slurm | default nodes | feature `preemptible` (`--constraint=preemptible`) |
+
+Request fields: `num_preemptible_gpus` (create/update). Response: `desired_preemptible_gpus`
+(echo of target), `allocated_preemptible_gpus` (live count; can sit below the target).
+`project_id` is required when the preemptible target is greater than 0.
+
+### Console
+
+At create time in the [console](https://api.together.ai/clusters): **Create cluster** →
+set standard **Select GPU Count** → under **Add preemptible compute**, set **Preemptible
+GPUs** (multiples of 8; capped at current availability for that GPU type) → **Create
+Cluster**.
+
+To change the target on an existing cluster: open the cluster → **Scale** → **Scale
+Preemptible GPUs**. The details page shows **Preemptible Nodes** and **Preemptible rate**.
+During reclaim, a warning banner names the nodes; events also appear under **Event
+timeline**.
+
+### CLI
+
+```shell
+tg beta clusters create \
+  --name my-cluster \
+  --region us-central-8 \
+  --gpu-type H100_SXM \
+  --cluster-type KUBERNETES \
+  --num-gpus 8 \
+  --billing-type ON_DEMAND \
+  --nvidia-driver-version 570 \
+  --cuda-version 12.8 \
+  --num-preemptible-gpus 8 \
+  --project PROJECT_ID \
+  --non-interactive --json
+
+tg beta clusters update CLUSTER_ID --num-preemptible-gpus 16
+
+tg beta clusters retrieve CLUSTER_ID --json \
+  | jq '{status, desired_preemptible_gpus, allocated_preemptible_gpus}'
+```
+
+Pass `--project` (or `TOGETHER_PROJECT_ID`) whenever the preemptible target is greater
+than 0.
+
+### Schedule workloads
+
+Pin interruptible workers to preemptible nodes; keep coordinators and serving on
+standard nodes.
+
+```yaml
+# Worker
+nodeSelector:
+  together.ai/compute-class: preemptible
+
+# Coordinator / serving
+nodeSelector:
+  together.ai/compute-class: non-preemptible
+```
+
+Slurm: `#SBATCH --constraint=preemptible` and usually `#SBATCH --requeue`. Checkpoint to
+shared storage (`/home` on Slurm, a shared volume on Kubernetes). Full preemption
+handlers: [Preemptible compute](https://docs.together.ai/docs/preemptible-compute).
 
 ## Storage
 

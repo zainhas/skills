@@ -40,6 +40,7 @@ gang scheduling on a running cluster is `domains/kueue.md` or `domains/volcano.m
 - The API requires `cuda_version` and `nvidia_driver_version` as separate fields in addition to the combined `driver_version` string. Pass them via `extra_body` in the Python SDK.
 - Credentials retrieval is part of provisioning. Do not stop at cluster creation if the user needs to run workloads immediately.
 - Slurm startup scripts (worker/login init, worker/controller prolog and epilog, extra `slurm.conf`) are **Slinky v1.0 only**. A non-zero exit from a worker prolog or epilog drains the node, and calling Slurm commands (`squeue`, `scontrol`, `sacctmgr`) inside any prolog/epilog can deadlock the scheduler.
+- Preemptible capacity is a target on an existing cluster (`num_preemptible_gpus`, multiples of 8), not a separate cluster type. Kubernetes labels: workers `together.ai/compute-class=preemptible`, coordinators/serving `together.ai/compute-class=non-preemptible`. Console: Create cluster → Add preemptible compute, or Scale → Scale Preemptible GPUs. CLI needs `--project` when the target is greater than 0.
 
 ## Open next
 
@@ -52,14 +53,15 @@ read just that section; long ones start with `## Contents`.
 | [references/gpu-clusters/pricing-and-discovery.md](references/gpu-clusters/pricing-and-discovery.md) | 82 | authoritative pricing and stock surfaces, read-only inventory commands, picking the cheapest live option, one-hour on-demand plan | pricing, availability, or a plan without provisioning |
 | [scripts/gpu-clusters/manage_cluster.py](scripts/gpu-clusters/manage_cluster.py) (.ts) | 237 | create, poll, credentials, scale, delete | provisioning or changing a cluster |
 | [scripts/gpu-clusters/manage_storage.py](scripts/gpu-clusters/manage_storage.py) | 129 | create, list, resize, delete shared volumes | managing storage on its own |
-| [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 305 | `tg` cluster and storage commands, global flags, instance types, driver versions | a CLI flag or driver version |
-| [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 478 | cluster and storage endpoints, request fields, regions, instance types | an API field the script does not set |
-| [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 571 | architecture, access, Slurm config, GPU containers, scaling, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
+| [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 325 | `tg` cluster and storage commands, global flags, instance types, driver versions, `--num-preemptible-gpus` | a CLI flag or driver version |
+| [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 485 | cluster and storage endpoints, request fields, preemptible GPU fields, regions, instance types | an API field the script does not set |
+| [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 645 | architecture, access, Slurm config, GPU containers, scaling, preemptible compute, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
 
 ## Docs
 
 - [GPU Clusters Overview](https://docs.together.ai/docs/gpu-clusters-overview)
 - [GPU Clusters Quickstart](https://docs.together.ai/docs/gpu-clusters-quickstart)
+- [Preemptible Compute](https://docs.together.ai/docs/preemptible-compute)
 - [Clusters API](https://docs.together.ai/reference/clusters-create)
 - [GPU Cluster Pricing](https://www.together.ai/pricing#gpu-clusters)
 - [Slurm Startup Scripts](https://docs.together.ai/docs/slurm-startup-scripts)

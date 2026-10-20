@@ -133,6 +133,7 @@ together beta clusters create \
 | `billing_type` | string | Yes | `ON_DEMAND` or `RESERVED` |
 | `cluster_type` | string | No | `KUBERNETES` (default) or `SLURM` |
 | `duration_days` | integer | No | Reservation length in days (only with `RESERVED`) |
+| `num_preemptible_gpus` | integer | No | Preemptible GPU target (multiple of 8). Requires `project_id` when greater than 0. |
 | `volume_id` | string | No | Existing shared volume ID to attach |
 | `shared_volume` | object | No | Inline volume: `{volume_name, size_tib, region}` |
 
@@ -218,6 +219,7 @@ together beta clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNET
 | Field | Type | Description |
 |-------|------|-------------|
 | `num_gpus` | integer | New GPU count (must be a multiple of 8) |
+| `num_preemptible_gpus` | integer | Preemptible GPU target (multiple of 8). Omit to keep the current value. |
 | `cluster_type` | string | `KUBERNETES` or `SLURM` |
 
 ## Delete Cluster
@@ -467,6 +469,8 @@ The combined `driver_version` string follows the pattern `CUDA_{major}_{minor}_{
   "region": "us-central-8",
   "gpu_type": "H100_SXM",
   "num_gpus": 8,
+  "desired_preemptible_gpus": 8,
+  "allocated_preemptible_gpus": 0,
   "driver_version": "CUDA_12_6_560",
   "duration_hours": 720,
   "status": "Ready",
@@ -476,3 +480,6 @@ The combined `driver_version` string follows the pattern `CUDA_{major}_{minor}_{
   "kube_config": "..."
 }
 ```
+
+`desired_preemptible_gpus` echoes the request target. `allocated_preemptible_gpus` is the live
+count and can sit below the target when capacity is tight.
