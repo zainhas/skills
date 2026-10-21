@@ -3,7 +3,8 @@
 Text-to-speech (REST, streaming, realtime WebSocket) and speech-to-text (transcription,
 translation, diarization, timestamps, realtime). Serverless TTS includes `hexgrad/Kokoro-82M`,
 `cartesia/sonic-3`, and `canopylabs/orpheus-3b-0.1-ft`; STT includes
-`openai/whisper-large-v3` and `nvidia/parakeet-tdt-0.6b-v3`.
+`openai/whisper-large-v3`, `nvidia/nemotron-3-asr-streaming-0.6b`, and
+`nvidia/nemotron-3.5-asr-streaming-0.6b`.
 
 ## Workflow
 
@@ -40,7 +41,7 @@ translation, diarization, timestamps, realtime). Serverless TTS includes `hexgra
 | [scripts/audio/stt_transcribe.py](scripts/audio/stt_transcribe.py) (.ts) | 221 | transcription, translation, diarization, timestamps | transcribing files |
 | [scripts/audio/stt_realtime.py](scripts/audio/stt_realtime.py) | 125 | realtime STT over WebSocket | live captions or voice input |
 | [references/audio/tts-models.md](references/audio/tts-models.md) | 227 | TTS models, REST and streaming parameters, WebSocket protocol, voice lists | choosing a voice or TTS parameter |
-| [references/audio/stt-models.md](references/audio/stt-models.md) | 303 | STT models, input formats, limits, response formats, realtime protocol, errors | an STT parameter, limit, or error |
+| [references/audio/stt-models.md](references/audio/stt-models.md) | 304 | STT models, input formats, limits, response formats, realtime protocol, errors | an STT parameter, limit, or error |
 
 ## Docs
 
