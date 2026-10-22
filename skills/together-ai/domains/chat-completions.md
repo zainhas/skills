@@ -40,6 +40,9 @@ print(resp.choices[0].message.content)
   one). Check `chunk.choices` before reading `chunk.choices[0]`.
 - Tool calling is a loop, not one round trip: execute every tool call, append each result as a
   `tool` message, call the model again, and repeat until it answers without tool calls.
+- When reassembling streamed tool calls from `delta.tool_calls`, the first delta for a call may
+  carry only the function name and omit `arguments` (`None` / `null`). Seed arguments to `""`
+  and append with `or ""` / `?? ""` — do not `+=` onto a missing value.
 - **Ground the final answer in tool results.** When the user asked for an action (create a
   ticket, send an email), do not accept a final answer until that tool has a successful result.
   If the model answers without it, tell it which call is missing and continue the loop. If it
@@ -78,7 +81,7 @@ Open a file only for the detail its row names. References over 100 lines start w
 | [scripts/chat-completions/debug_headers.py](scripts/chat-completions/debug_headers.py) (.ts) | 57 | raw response, rate-limit and routing headers | debugging latency, 429s, or routing |
 | [references/chat-completions/models.md](references/chat-completions/models.md) | 73 | model picks by use case, context lengths, vision and moderation models | choosing a model (verify it is live) |
 | [references/chat-completions/api-parameters.md](references/chat-completions/api-parameters.md) | 481 | every request parameter, message object, OpenAI-SDK compatibility, rate-limit tiers, HTTP status codes | a parameter or status code not covered above |
-| [references/chat-completions/function-calling-patterns.md](references/chat-completions/function-calling-patterns.md) | 841 | six calling patterns (parallel, multi-step, ...), `tool_choice`, tools plus structured output, best practices, supported models | a tool pattern the script does not show |
+| [references/chat-completions/function-calling-patterns.md](references/chat-completions/function-calling-patterns.md) | 844 | six calling patterns (parallel, multi-step, ...), `tool_choice`, tools plus structured output, best practices, supported models | a tool pattern the script does not show |
 | [references/chat-completions/structured-outputs.md](references/chat-completions/structured-outputs.md) | 541 | the three JSON modes, reasoning plus JSON, streaming JSON, troubleshooting | JSON output fails to parse or validate |
 | [references/chat-completions/reasoning-models.md](references/chat-completions/reasoning-models.md) | 481 | reasoning model table, effort levels, hybrid toggles, output format, token accounting | tuning reasoning depth or cost |
 

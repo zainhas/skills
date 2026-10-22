@@ -812,7 +812,10 @@ tool-calling turn). Build the loop defensively:
 
 - Lower the temperature (e.g. `0`) to make tool selection and argument generation more
   deterministic. Raise it only when more varied behavior is needed.
-- Stream when latency matters: tool calls stream incrementally through `delta.tool_calls`.
+- Stream when latency matters: tool calls stream incrementally through `delta.tool_calls`. The
+  first delta for a call may carry only `name` and omit `arguments` (seen on GLM-5.3); accumulate
+  into a dict seeded with `""` and guard each fragment with `or ""` (Python) or `?? ""`
+  (TypeScript). Do not `+=` onto a missing value.
 - Watch the token budget: tool descriptions and schemas count toward input tokens. Tighten or
   split the tool set if you approach the limit.
 
