@@ -19,18 +19,19 @@ These models are current in the latest speech-to-text guide and are not listed i
 
 | Model | API String | Access | Capabilities |
 |-------|-----------|--------|--------------|
-| Whisper Large v3 | `openai/whisper-large-v3` | Serverless | Realtime, translation, diarization |
+| Whisper Large v3 | `openai/whisper-large-v3` | Dedicated / Reserved | Realtime, translation, diarization |
 | Deepgram Flux | `deepgram/deepgram-flux` | Dedicated / Reserved | Realtime |
 | Deepgram Nova 3 | `deepgram/deepgram-nova-3` | Dedicated / Reserved | Transcription |
 | Deepgram Nova 3 Multilingual | `deepgram/deepgram-nova-3-multilingual` | Dedicated / Reserved | Transcription |
-| Parakeet TDT 0.6B v3 | `nvidia/parakeet-tdt-0.6b-v3` | Serverless | Realtime, diarization |
+| Parakeet TDT 0.6B v3 | `nvidia/parakeet-tdt-0.6b-v3` | Dedicated / Reserved | Realtime, diarization |
 | Nemotron 3 ASR Streaming 0.6B | `nvidia/nemotron-3-asr-streaming-0.6b` | Serverless | Streaming transcription |
 | Nemotron 3.5 ASR Streaming 0.6B | `nvidia/nemotron-3.5-asr-streaming-0.6b` | Serverless | Streaming transcription |
 
 Notes:
 - The `/audio/transcriptions` and `/audio/translations` reference schemas currently enumerate
   `openai/whisper-large-v3` in the request body.
-- The broader guide model catalog also includes Parakeet and dedicated-endpoint Deepgram models.
+- Whisper and Parakeet are no longer on serverless; they remain available on dedicated endpoints.
+  Deepgram models are dedicated-endpoint only. Serverless STT is Nemotron ASR Streaming.
 
 ## Supported Input Formats
 
