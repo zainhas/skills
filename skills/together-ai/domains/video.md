@@ -16,7 +16,9 @@ poll to a terminal state, then download. Still images go to `domains/images.md`.
 
 - Do not treat video like a synchronous image call, and do not end the task while a job you
   submitted is still `queued` or `in_progress`.
-- Keyframe and reference-image support are model-specific; check before promising them.
+- Keyframe and reference-image support are model-specific; check before promising them. Pass
+  them under `media` (`media.frame_images`, `media.reference_images`); the SDKs reject top-level
+  `frame_images` / `reference_images`.
 - Set dimensions and duration explicitly rather than relying on defaults.
 - HTTP 402 `insufficient balance` is an account problem; switching models will not help.
 
@@ -27,7 +29,7 @@ poll to a terminal state, then download. Still images go to `domains/images.md`.
 | [scripts/video/generate_video.py](scripts/video/generate_video.py) (.ts) | 130 | text-to-video, polling loop, reference images, download | generating from a prompt |
 | [scripts/video/image_to_video.py](scripts/video/image_to_video.py) | 160 | first/last keyframe control | animating an image |
 | [references/video/models.md](references/video/models.md) | 59 | model table, per-model dimensions, feature support, prompt limits | choosing a model or size |
-| [references/video/api-reference.md](references/video/api-reference.md) | 312 | create and status fields, job statuses, polling pattern, guidance and steps, troubleshooting | a parameter or failure not covered above |
+| [references/video/api-reference.md](references/video/api-reference.md) | 311 | create and status fields, job statuses, polling pattern, guidance and steps, troubleshooting | a parameter or failure not covered above |
 
 ## Docs
 

@@ -99,7 +99,9 @@ content = (
 
 ### 1. Upload Input File
 
-Pass `check=False` to skip client-side file validation and let the server validate during the `VALIDATING` phase.
+In Python, pass `check=False` to skip client-side JSONL validation (with `check=True`, malformed
+lines raise `FileTypeError` before upload). The TypeScript SDK checks only the file extension.
+The server still validates during the `VALIDATING` phase.
 
 ```python
 from together import Together
@@ -113,7 +115,7 @@ print(file_resp.id)  # file-abc123
 import Together from "together-ai";
 
 const client = new Together();
-const fileResp = await client.files.upload("batch_input.jsonl", "batch-api", false);
+const fileResp = await client.files.upload("batch_input.jsonl", "batch-api");
 console.log(fileResp.id);
 ```
 

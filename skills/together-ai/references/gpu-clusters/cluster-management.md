@@ -34,7 +34,7 @@
 
 ```shell
 # Get credentials
-together beta clusters get-credentials <CLUSTER_ID>
+tg clusters get-credentials <CLUSTER_ID>
 export KUBECONFIG=$HOME/.kube/config
 
 # Verify
@@ -59,7 +59,7 @@ Two SSH methods are supported. On Slurm clusters with OIDC enabled, pick one fro
 
 | Method | How it works | Requirements |
 |--------|--------------|--------------|
-| **OIDC (Together CLI)** | Browser sign-in that mints a short-lived certificate, executed via `tg beta clusters ssh`. | Together CLI installed (`uv tool install "together[cli]"`, 2.20+, Python 3.10+). Choose a login name when prompted in the cluster UI. No SSH key required. |
+| **OIDC (Together CLI)** | Browser sign-in that mints a short-lived certificate, executed via `tg clusters ssh`. | Together CLI installed (`uv tool install "together[cli]"`, 2.20+, Python 3.10+). Choose a login name when prompted in the cluster UI. No SSH key required. |
 | **Key-based** | Standard `ssh -J` proxy jump through the cluster's bastion. | SSH public key uploaded at `api.together.ai/settings/ssh-key` before cluster creation. |
 
 The cluster UI's **Copy SSH command** (worker/compute) and **Copy head node SSH command** (Slurm login) buttons emit a command shaped for the selected method.
@@ -78,11 +78,11 @@ ssh -J <LOGIN>@ssh.<CLUSTER_ID>.<REGION>.cloud.together.ai <LOGIN>@slurm-login
 
 ```shell
 # Worker node (Kubernetes) or Slurm compute node
-tg beta clusters ssh https://dex.<REGION>.cloud.together.ai/<CLUSTER_ID> \
+tg clusters ssh https://dex.<REGION>.cloud.together.ai/<CLUSTER_ID> \
   --login <LOGIN> --host <NODE_HOSTNAME>
 
 # Slurm login node (host defaults to the head node)
-tg beta clusters ssh https://dex.<REGION>.cloud.together.ai/<CLUSTER_ID> --login <LOGIN>
+tg clusters ssh https://dex.<REGION>.cloud.together.ai/<CLUSTER_ID> --login <LOGIN>
 ```
 
 If the CLI was previously installed with `pip`, migrate to the `uv`-managed install before using OIDC SSH: `pip uninstall together` and reinstall with `uv tool install "together[cli]"`.
@@ -224,11 +224,11 @@ Scale via UI, CLI, or API at any time. GPU count must be a multiple of 8.
 from together import Together
 client = Together()
 
-cluster = client.beta.clusters.update("cluster-id", num_gpus=16)
+cluster = client.clusters.update("cluster-id", num_gpus=16)
 ```
 
 ```shell
-together beta clusters update <CLUSTER_ID> --num-gpus 16
+tg clusters update <CLUSTER_ID> --num-gpus 16
 ```
 
 ### Autoscaling (Kubernetes)

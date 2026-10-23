@@ -54,7 +54,7 @@ for the request to succeed. Pass them via `extra_body` in the SDK or directly in
 from together import Together
 client = Together()
 
-cluster = client.beta.clusters.create(
+cluster = client.clusters.create(
     cluster_name="my-gpu-cluster",
     region="us-central-8",
     gpu_type="H100_SXM",
@@ -75,7 +75,7 @@ print(cluster.cluster_id)
 import Together from "together-ai";
 const client = new Together();
 
-const cluster = await client.beta.clusters.create({
+const cluster = await client.clusters.create({
   cluster_name: "my-gpu-cluster",
   region: "us-central-8",
   gpu_type: "H100_SXM",
@@ -109,7 +109,7 @@ curl -X POST \
 ```
 
 ```shell
-together beta clusters create \
+tg clusters create \
   --name my-gpu-cluster \
   --num-gpus 8 \
   --gpu-type H100_SXM \
@@ -139,13 +139,13 @@ together beta clusters create \
 ## List Clusters
 
 ```python
-response = client.beta.clusters.list()
+response = client.clusters.list()
 for c in response.clusters:
     print(f"{c.cluster_id}: {c.cluster_name} ({c.status}, {c.num_gpus} GPUs)")
 ```
 
 ```typescript
-const response = await client.beta.clusters.list();
+const response = await client.clusters.list();
 for (const c of response.clusters) {
   console.log(`${c.cluster_id}: ${c.cluster_name} (${c.status})`);
 }
@@ -158,18 +158,18 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters list
+tg clusters list
 ```
 
 ## Get Cluster
 
 ```python
-cluster = client.beta.clusters.retrieve("cluster-id")
+cluster = client.clusters.retrieve("cluster-id")
 print(f"Status: {cluster.status}, GPUs: {cluster.num_gpus}")
 ```
 
 ```typescript
-const cluster = await client.beta.clusters.retrieve("cluster-id");
+const cluster = await client.clusters.retrieve("cluster-id");
 console.log(cluster);
 ```
 
@@ -180,13 +180,13 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters retrieve <CLUSTER_ID>
+tg clusters retrieve <CLUSTER_ID>
 ```
 
 ## Update / Scale Cluster
 
 ```python
-cluster = client.beta.clusters.update(
+cluster = client.clusters.update(
     "cluster-id",
     num_gpus=16,
     cluster_type="KUBERNETES",
@@ -194,7 +194,7 @@ cluster = client.beta.clusters.update(
 ```
 
 ```typescript
-const cluster = await client.beta.clusters.update("cluster-id", {
+const cluster = await client.clusters.update("cluster-id", {
   num_gpus: 16,
   cluster_type: "KUBERNETES",
 });
@@ -209,8 +209,8 @@ curl -X PUT \
 ```
 
 ```shell
-together beta clusters update <CLUSTER_ID> --num-gpus 16
-together beta clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNETES
+tg clusters update <CLUSTER_ID> --num-gpus 16
+tg clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNETES
 ```
 
 ### Update Request Body
@@ -223,11 +223,11 @@ together beta clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNET
 ## Delete Cluster
 
 ```python
-client.beta.clusters.delete("cluster-id")
+client.clusters.delete("cluster-id")
 ```
 
 ```typescript
-await client.beta.clusters.delete("cluster-id");
+await client.clusters.delete("cluster-id");
 ```
 
 ```shell
@@ -237,19 +237,19 @@ curl -X DELETE \
 ```
 
 ```shell
-together beta clusters delete <CLUSTER_ID>
+tg clusters delete <CLUSTER_ID>
 ```
 
 ## List Regions
 
 ```python
-regions = client.beta.clusters.list_regions()
+regions = client.clusters.list_regions()
 for r in regions.regions:
     print(f"{r.name}: {r.supported_instance_types}, drivers: {r.driver_versions}")
 ```
 
 ```typescript
-const regions = await client.beta.clusters.listRegions();
+const regions = await client.clusters.listRegions();
 console.log(regions);
 ```
 
@@ -260,13 +260,13 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters list-regions
+tg clusters list-regions
 ```
 
 ## Create Shared Volume
 
 ```python
-volume = client.beta.clusters.storage.create(
+volume = client.clusters.storage.create(
     volume_name="my-shared-volume",
     size_tib=2,
     region="us-central-8",
@@ -275,7 +275,7 @@ print(volume.volume_id)
 ```
 
 ```typescript
-const volume = await client.beta.clusters.storage.create({
+const volume = await client.clusters.storage.create({
   volume_name: "my-shared-volume",
   size_tib: 2,
   region: "us-central-8",
@@ -292,7 +292,7 @@ curl -X POST \
 ```
 
 ```shell
-together beta clusters storage create \
+tg clusters storage create \
   --volume-name my-shared-volume \
   --size-tib 2 \
   --region us-central-8
@@ -309,13 +309,13 @@ together beta clusters storage create \
 ## List Shared Volumes
 
 ```python
-volumes = client.beta.clusters.storage.list()
+volumes = client.clusters.storage.list()
 for v in volumes.volumes:
     print(f"{v.volume_id}: {v.volume_name} ({v.size_tib} TiB, {v.status})")
 ```
 
 ```typescript
-const volumes = await client.beta.clusters.storage.list();
+const volumes = await client.clusters.storage.list();
 console.log(volumes);
 ```
 
@@ -326,18 +326,18 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters storage list
+tg clusters storage list
 ```
 
 ## Get Shared Volume
 
 ```python
-volume = client.beta.clusters.storage.retrieve("volume-id")
+volume = client.clusters.storage.retrieve("volume-id")
 print(f"{volume.volume_name}: {volume.size_tib} TiB ({volume.status})")
 ```
 
 ```typescript
-const volume = await client.beta.clusters.storage.retrieve("volume-id");
+const volume = await client.clusters.storage.retrieve("volume-id");
 console.log(volume);
 ```
 
@@ -348,20 +348,20 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters storage retrieve <VOLUME_ID>
+tg clusters storage retrieve <VOLUME_ID>
 ```
 
 ## Update (Resize) Shared Volume
 
 ```python
-volume = client.beta.clusters.storage.update(
+volume = client.clusters.storage.update(
     volume_id="volume-id",
     size_tib=5,
 )
 ```
 
 ```typescript
-const volume = await client.beta.clusters.storage.update({
+const volume = await client.clusters.storage.update({
   volume_id: "volume-id",
   size_tib: 5,
 });
@@ -380,11 +380,11 @@ curl -X PUT \
 Volume must not be attached to any cluster.
 
 ```python
-client.beta.clusters.storage.delete("volume-id")
+client.clusters.storage.delete("volume-id")
 ```
 
 ```typescript
-await client.beta.clusters.storage.delete("volume-id");
+await client.clusters.storage.delete("volume-id");
 ```
 
 ```shell
@@ -394,7 +394,7 @@ curl -X DELETE \
 ```
 
 ```shell
-together beta clusters storage delete <VOLUME_ID>
+tg clusters storage delete <VOLUME_ID>
 ```
 
 ## Instance Types

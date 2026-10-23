@@ -11,7 +11,7 @@ Usage:
     python manage_cluster.py demo
 
 Requires:
-    uv pip install "together>=2.0.0"
+    uv pip install "together>=3.0.0"
     export TOGETHER_API_KEY=your_key
 """
 
@@ -25,7 +25,7 @@ client = Together()
 
 def list_regions():
     """List available regions with supported GPUs and drivers."""
-    regions = client.beta.clusters.list_regions()
+    regions = client.clusters.list_regions()
     for region in regions.regions:
         print(f"  {region.name}: GPUs={region.supported_instance_types}, Drivers={region.driver_versions}")
     return regions
@@ -33,7 +33,7 @@ def list_regions():
 
 def list_clusters() -> list:
     """List all GPU clusters."""
-    response = client.beta.clusters.list()
+    response = client.clusters.list()
     for cluster in response.clusters:
         print(f"  {cluster.cluster_id}: {cluster.cluster_name} ({cluster.status}, {cluster.num_gpus} GPUs, {cluster.gpu_type})")
     return response.clusters
@@ -90,7 +90,7 @@ def create_cluster(
             "region": region,
         }
 
-    cluster = client.beta.clusters.create(**kwargs)
+    cluster = client.clusters.create(**kwargs)
     print(f"Created cluster: {cluster.cluster_id} (status: {cluster.status})")
     return cluster
 
@@ -99,7 +99,7 @@ def wait_for_ready(cluster_id: str, timeout: int = 1800, poll_interval: int = 30
     """Poll until cluster reaches Ready state."""
     elapsed = 0
     while elapsed < timeout:
-        cluster = client.beta.clusters.retrieve(cluster_id)
+        cluster = client.clusters.retrieve(cluster_id)
         print(f"  Status: {cluster.status} ({elapsed}s)")
 
         if cluster.status == "Ready":
@@ -115,14 +115,14 @@ def wait_for_ready(cluster_id: str, timeout: int = 1800, poll_interval: int = 30
 
 def scale_cluster(cluster_id: str, num_gpus: int):
     """Scale a cluster to a new GPU count."""
-    cluster = client.beta.clusters.update(cluster_id, num_gpus=num_gpus)
+    cluster = client.clusters.update(cluster_id, num_gpus=num_gpus)
     print(f"Scaled cluster {cluster_id} to {num_gpus} GPUs (status: {cluster.status})")
     return cluster
 
 
 def delete_cluster(cluster_id: str) -> None:
     """Delete a GPU cluster."""
-    client.beta.clusters.delete(cluster_id)
+    client.clusters.delete(cluster_id)
     print(f"Deleted cluster: {cluster_id}")
 
 

@@ -8,8 +8,10 @@ waiting on, use `domains/chat-completions.md` instead.
 ## Workflow
 
 1. Write a JSONL file; each line is `{"custom_id": ..., "body": {chat request}}`.
-2. Upload it: `client.files.upload(file=path, purpose="batch-api", check=False)`; the server
-   validates during `VALIDATING`.
+2. Upload it: Python `client.files.upload(file=path, purpose="batch-api", check=False)`
+   (malformed lines raise `FileTypeError` when `check=True`); TypeScript
+   `client.files.upload(path, "batch-api")` (extension check only). The server validates during
+   `VALIDATING`.
 3. `client.batches.create(input_file_id=..., endpoint="/v1/chat/completions")`.
 4. Poll `client.batches.retrieve(batch_id)` until `COMPLETED`, `FAILED`, `EXPIRED`, or
    `CANCELLED`.
@@ -34,7 +36,7 @@ waiting on, use `domains/chat-completions.md` instead.
 | File | Lines | Contains | Open when |
 |---|---|---|---|
 | [scripts/batch-inference/batch_workflow.py](scripts/batch-inference/batch_workflow.py) (.ts) | 170 | build JSONL, upload, create, poll, download, reconcile | running a batch end to end |
-| [references/batch-inference/api-reference.md](references/batch-inference/api-reference.md) | 307 | JSONL input and output formats, job object and statuses, discounted and excluded models, limits, error codes, CLI | a format detail, status, limit, or error |
+| [references/batch-inference/api-reference.md](references/batch-inference/api-reference.md) | 309 | JSONL input and output formats, job object and statuses, discounted and excluded models, limits, error codes, CLI | a format detail, status, limit, or error |
 
 ## Docs
 

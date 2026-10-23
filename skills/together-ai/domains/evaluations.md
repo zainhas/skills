@@ -7,7 +7,8 @@ repeatable. To change a model rather than measure it, go to `domains/fine-tuning
 ## Workflow
 
 1. Pick classify, score, or compare, and define the dataset columns before writing code.
-2. Upload the dataset as an eval file (`check=False`) and keep the file ID.
+2. Upload the dataset as an eval file (Python: `check=False`; TypeScript has no check flag) and
+   keep the file ID.
 3. Choose judge and target models explicitly. The evaluation service keeps its **own** serverless
    allowlist, separate from the main catalog; check it live (free):
    `GET https://api.together.xyz/v1/evaluation/model-list?model_source=serverless`. On 2026-10-07
@@ -18,7 +19,8 @@ repeatable. To change a model rather than measure it, go to `domains/fine-tuning
 
 ## Rules
 
-- Upload eval files with `check=False`; local validation misreads eval datasets.
+- Upload eval files with Python `check=False`; local validation misreads eval datasets. The
+  TypeScript SDK checks only the file extension.
 - Compare works best when both candidate responses are already columns in the dataset.
 - Vision evals need an `image_data_urls` column of base64 data URLs, and a vision-capable model
   and judge.

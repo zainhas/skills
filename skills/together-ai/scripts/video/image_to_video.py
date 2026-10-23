@@ -66,7 +66,7 @@ def image_to_video_url(
         model=model,
         width=width,
         height=height,
-        frame_images=[{"input_image": image_url, "frame": frame}],
+        media={"frame_images": [{"input_image": image_url, "frame": frame}]},
     )
     print(f"Submitted job: {job.id}")
     video_url = wait_for_video(job.id)
@@ -92,7 +92,7 @@ def image_to_video_base64(
         model=model,
         width=width,
         height=height,
-        frame_images=[{"input_image": img_b64, "frame": frame}],
+        media={"frame_images": [{"input_image": img_b64, "frame": frame}]},
     )
     print(f"Submitted job: {job.id}")
     video_url = wait_for_video(job.id)
@@ -114,10 +114,10 @@ def first_and_last_keyframes(
         model=model,
         width=width,
         height=height,
-        frame_images=[
+        media={"frame_images": [
             {"input_image": first_image_url, "frame": "first"},
             {"input_image": last_image_url, "frame": "last"},
-        ],
+        ]},
     )
     print(f"Submitted job: {job.id}")
     return wait_for_video(job.id)

@@ -447,7 +447,7 @@ evaluation = client.evals.create(
 ## Dataset Format
 
 Upload JSONL or CSV with `purpose="eval"`. When using the SDK helpers in this repo, pass
-`check=False` to bypass the local file checker for eval datasets.
+Python `check=False` to bypass the local file checker for eval datasets (TypeScript checks only the extension).
 
 For classify and score jobs, include prompts and optionally pre-generated responses:
 

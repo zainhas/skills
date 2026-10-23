@@ -1,6 +1,6 @@
 ---
 name: together-ai
-description: "Together AI platform skill covering every product area: chat completions and streaming text generation, tool calling, structured outputs, reasoning and vision models; image generation and editing (FLUX, Kontext); video generation; text-to-speech and speech-to-text; embeddings and reranking; fine-tuning (LoRA, full, DPO, VLM, BYOM); batch inference; LLM-as-a-judge evaluations; code sandboxes; dedicated model inference (tg beta endpoints, deployments, autoscaling, traffic splits, model and LoRA uploads); dedicated containers (Sprocket, Jig); GPU clusters (Kubernetes, Slurm) with Kueue or Volcano scheduling; and TogetherLink (tlink, tclaude) for running Claude Code, Codex, OpenCode, or desktop apps on Together models. Reach for it whenever the user builds, debugs, deploys, trains, evaluates, or operates anything on Together AI, or mentions the together SDK, the tg CLI, TogetherLink, api.together.ai, TOGETHER_API_KEY, or a Together-hosted model id. The skill body routes each request to the matching domain guide."
+description: "Together AI platform skill covering every product area: chat completions and streaming text generation, tool calling, structured outputs, reasoning and vision models; image generation and editing (FLUX, Kontext); video generation; text-to-speech and speech-to-text; embeddings and reranking; fine-tuning (LoRA, full, DPO, VLM, BYOM); batch inference; LLM-as-a-judge evaluations; code sandboxes; dedicated model inference (tg endpoints, deployments, autoscaling, traffic splits, model and LoRA uploads); dedicated containers (Sprocket, Jig); GPU clusters (Kubernetes, Slurm) with Kueue or Volcano scheduling; and TogetherLink (tlink, tclaude) for running Claude Code, Codex, OpenCode, or desktop apps on Together models. Reach for it whenever the user builds, debugs, deploys, trains, evaluates, or operates anything on Together AI, or mentions the together SDK, the tg CLI, TogetherLink, api.together.ai, TOGETHER_API_KEY, or a Together-hosted model id. The skill body routes each request to the matching domain guide."
 ---
 
 # Together AI
@@ -11,15 +11,19 @@ only when it holds a detail you need. Paths are relative to this skill's directo
 
 ## Setup
 
-- Auth: `TOGETHER_API_KEY` in the environment. Python: `uv pip install --upgrade "together>=2.0.0"`,
-  then `client = Together()`. TypeScript: `npm install together-ai`, then `new Together()`. The
-  Python SDK and this skill's scripts use only the API key. From CLI 2.41, `tg login` signs in
+- Auth: `TOGETHER_API_KEY` in the environment. Python: `uv pip install --upgrade "together>=3.0.0"`,
+  then `client = Together()`. TypeScript: `npm install together-ai@latest`, then `new Together()`.
+  The Python SDK and this skill's scripts use only the API key. From CLI 2.41, `tg login` signs in
   through a browser device flow (`--no-browser` prints the URL) and `tg switch` picks a project;
   it is interactive, so ask the user to run it. The CLI also accepts `TOGETHER_API_KEY`.
-- CLI: `uv tool install "together[cli]"` gives `tg` (alias `together`), used for dedicated
-  inference, clusters, and fine-tuning. If `tg beta endpoints` or `tg beta models` is missing, the
-  CLI is outdated: `uv tool upgrade together`. From 2.40, `tg` prints JSON by default when an AI
-  agent runs it; pass `--no-json` for tables.
+- CLI: `uv tool install "together[cli]"` (3.0+) gives `tg` (alias `together`), used for dedicated
+  inference, clusters, and fine-tuning. Dedicated endpoints, models, and clusters are top-level
+  (`tg endpoints`, `tg models`, `tg clusters`); the old `tg beta ...` aliases are gone in CLI 3.0.
+  If those commands are missing, upgrade: `uv tool upgrade together`. From 2.40, `tg` prints JSON
+  by default when an AI agent runs it; pass `--no-json` for tables.
+- Custom `base_url` / `baseURL` / `TOGETHER_BASE_URL`: do not append `/v1`. Method paths carry their
+  own version. OpenAI-compatible clients still use `https://api.together.ai/v1` (or
+  `https://api-inference.together.ai/v1`).
 
 ## Guides
 
@@ -34,7 +38,7 @@ only when it holds a detail you need. Paths are relative to this skill's directo
 | `domains/evaluations.md` | LLM-as-a-judge: classify, score, or compare outputs |
 | `domains/fine-tuning.md` | LoRA, full, DPO, VLM, function-calling, and reasoning tuning; BYOM upload |
 | `domains/sandboxes.md` | remote stateful Python execution, data analysis, charts |
-| `domains/dedicated-model-inference.md` | dedicated endpoints (`tg beta endpoints`, `client.beta.endpoints`): deploy, autoscale, traffic split, A/B, shadow, metrics, model/LoRA upload, v1 migration (HTTP 403 `endpoints_v1_create_access_disabled`) |
+| `domains/dedicated-model-inference.md` | dedicated endpoints (`tg endpoints`, `client.endpoints`): deploy, autoscale, traffic split, A/B, shadow, metrics, model/LoRA upload, v1 migration (HTTP 403 `endpoints_v1_create_access_disabled`) |
 | `domains/dedicated-containers.md` | your own Docker inference worker: Sprocket, Jig, queue jobs |
 | `domains/gpu-clusters.md` | H100/H200/B200 clusters, Kubernetes or Slurm, shared storage, credentials |
 | `domains/kueue.md` | quota-gated job queueing on a Together Kubernetes cluster |
@@ -55,18 +59,20 @@ calling the API from the user's own code is `chat-completions` or `images`. A ta
   model is not served serverless: do not retry it or try other IDs from memory. Choose from the
   [serverless catalog](https://docs.together.ai/docs/serverless/models) and check the
   [deprecations page](https://docs.together.ai/docs/deprecations) for the named replacement; a chat
-  request with `max_tokens=1` confirms a model in one call. `client.models.list()` and
-  `tg beta models public` cannot confirm serverless availability: the first includes retired
-  models, the second lists only a curated subset.
+  request with `max_tokens=1` confirms a model in one call. `client.models.list()` lists models
+  in your project (not the serverless catalog). `tg models public` lists a curated dedicated
+  catalog subset. Neither confirms serverless availability.
 - **Do not retry errors that cannot succeed.** 400 non-serverless model, 401, 402
   `insufficient balance` (account-wide; another model will not help), 403, and 404 need a different
   input or a human. A 403 `third_party_data_sharing_blocked` means the organization must enable
   third-party data sharing for that partner-hosted model (for example FLUX.2 or Qwen Plus). Retry
   only 429 and 5xx, with backoff, a few times, then report.
-- **v2 SDK only.** v1 names raise `AttributeError`: `create_batch` is `batches.create`, `get_batch`
-  is `batches.retrieve`, `files.retrieve_content` is `files.content`, `evaluation.create` is
-  `evals.create`, `code_interpreter.run` is `code_interpreter.execute`, `file_id=` is
-  `input_file_id=`.
+- **Modern SDK method names.** Flat v1 names raise `AttributeError`: `create_batch` is
+  `batches.create`, `get_batch` is `batches.retrieve`, `files.retrieve_content` is `files.content`,
+  `evaluation.create` is `evals.create`, `code_interpreter.run` is `code_interpreter.execute`,
+  `file_id=` is `input_file_id=`. In SDK/CLI 3.0, DMI and clusters are top-level
+  (`client.endpoints`, `client.models`, `client.clusters`); `client.beta.endpoints` /
+  `client.beta.clusters` and the matching `tg beta ...` aliases are removed.
 - **Finish what you start.** Video, batch, evaluations, fine-tuning, queue jobs, and deployments
   are submit, poll to a terminal state, fetch. Do not end your turn while something you started is
   still provisioning, running, or being torn down: wait for the terminal state, or state exactly

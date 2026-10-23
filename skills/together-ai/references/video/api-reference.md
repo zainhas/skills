@@ -76,21 +76,20 @@ curl -X POST "https://api.together.xyz/v2/videos" \
 | `guidance_scale` | float | No | varies | Prompt adherence (6.0-10.0, avoid >12) |
 | `seed` | integer | No | random | Random seed for reproducibility |
 | `negative_prompt` | string | No | - | Elements to exclude |
-| `frame_images` | array | No | - | Keyframe images: `[{input_image, frame}]` |
-| `reference_images` | array | No | - | Style reference image URLs |
+| `media` | object | No | - | Image/video/audio inputs (`frame_images`, `reference_images`, …). SDKs do not accept top-level `frame_images` / `reference_images`. |
 | `output_format` | string | No | `"MP4"` | `"MP4"` or `"WEBM"` |
 | `output_quality` | integer | No | 20 | Compression quality (lower = higher quality) |
 
 *Prompt not required for Kling 2.1 Standard/Pro and Kling 1.6 Pro.
 
-### frame_images Schema
+### `media.frame_images` schema
 
-Each element in the `frame_images` array:
+Each element in `media.frame_images`:
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `input_image` | string | Image URL or base64-encoded image data |
-| `frame` | number or string | Frame index: `0`, `"first"`, or `"last"` |
+| `frame` | number or string | `"first"`, `"last"`, or a frame number. Without `frame`, one image is first, two are first+last, three or more are spaced evenly. |
 
 Frame number calculation: `frame = seconds x fps` (for specific frame positions).
 
@@ -138,10 +137,10 @@ job = client.videos.create(
     model="minimax/hailuo-02",
     width=1366,
     height=768,
-    frame_images=[{
+    media={"frame_images": [{
         "input_image": "https://cdn.pixabay.com/photo/2020/05/20/08/27/cat-5195431_1280.jpg",
         "frame": "first",
-    }],
+    }]},
 )
 ```
 
@@ -151,10 +150,10 @@ const job = await client.videos.create({
   model: "minimax/hailuo-02",
   width: 1366,
   height: 768,
-  frame_images: [{
+  media: { frame_images: [{
     input_image: "https://cdn.pixabay.com/photo/2020/05/20/08/27/cat-5195431_1280.jpg",
     frame: "first",
-  }],
+  }] },
 });
 ```
 
@@ -166,9 +165,9 @@ job = client.videos.create(
     model="minimax/hailuo-02",
     width=1366,
     height=768,
-    reference_images=[
+    media={"reference_images": [
         "https://cdn.pixabay.com/photo/2020/05/20/08/27/cat-5195431_1280.jpg",
-    ],
+    ]},
 )
 ```
 

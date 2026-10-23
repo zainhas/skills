@@ -97,7 +97,7 @@ def video_with_reference(
         model=model,
         width=1366,
         height=768,
-        reference_images=reference_images,
+        media={"reference_images": reference_images},
     )
     print(f"Submitted job: {job.id}")
     return wait_for_video(job.id)
@@ -126,5 +126,5 @@ if __name__ == "__main__":
     # print("\n=== Reference Images ===")
     # video_with_reference(
     #     prompt="A cat dancing energetically",
-    #     reference_images=["https://cdn.pixabay.com/photo/2020/05/20/08/27/cat-5195431_1280.jpg"],
+    #     reference_images=["https://cdn.pixabay.com/photo/2020/05/20/08/27/cat-5195431_1280.jpg"],  # via media=
     # )

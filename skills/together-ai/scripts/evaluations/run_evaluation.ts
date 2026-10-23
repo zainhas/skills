@@ -227,7 +227,7 @@ async function uploadDataset(dataset: DatasetRow[]): Promise<string> {
   fs.writeFileSync(dataPath, lines, "utf8");
 
   try {
-    const fileResponse = await client.files.upload(dataPath, "eval", false);
+    const fileResponse = await client.files.upload(dataPath, "eval");
     console.log(`Uploaded dataset: ${fileResponse.id}`);
     return fileResponse.id;
   } finally {

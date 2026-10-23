@@ -10,46 +10,61 @@
 
 ## Deployment Options
 
-### Option 1: Dedicated Endpoint
+### Option 1: Dedicated Model Inference
 
-Deploy your fine-tuned model on a dedicated endpoint for production use.
+Serve the fine-tune through [dedicated model inference](https://docs.together.ai/docs/dedicated-endpoints/overview)
+(SDK/CLI 3.0+). A completed job is already a private model in your project (`model_object_id` /
+`model_object_name` on the job). Prefer the CLI one-shot deploy; the SDK has no single-call
+equivalent.
+
+```bash
+# By model_object_name or model_object_id (ml_...)
+tg endpoints deploy "<MODEL_OBJECT_NAME>" --endpoint my-finetuned-endpoint
+tg endpoints get "<ENDPOINT_ID>"   # poll until DEPLOYMENT_STATE_READY
+```
+
+If the model has multiple deployment profiles, pass `--config <cr_...>` (`tg models configs "<MODEL_OBJECT_ID>"`).
 
 ```python
-endpoint = client.endpoints.create(
-    display_name="Fine-tuned Model",
-    model="your-username/Model-Name-your-suffix",
-    hardware="4x_nvidia_h100_80gb_sxm",
+from together import Together
+
+client = Together()
+identity = client.whoami()
+if identity.type != "project_api_key":
+    raise RuntimeError("TOGETHER_API_KEY must be a project API key")
+project_id = identity.project.id
+
+model = f"projects/{project_id}/models/<MODEL_OBJECT_ID>"
+config = f"projects/{project_id}/configs/<CONFIG_ID>"  # tg models configs <model>
+
+endpoint = client.endpoints.create(project_id=project_id, name="my-finetuned-endpoint")
+deployment = client.endpoints.deployments.create(
+    endpoint.id,
+    project_id=project_id,
+    name="prod",
+    model=model,
+    config=config,
     autoscaling={"min_replicas": 1, "max_replicas": 1},
 )
-print(f"Endpoint ID: {endpoint.id}")
+client.endpoints.update(
+    endpoint.id,
+    project_id=project_id,
+    traffic_split=[{"deployment_id": deployment.id, "weight": 1}],
+)
 
-# Wait for the endpoint to be ready
-import time
-while True:
-    ep = client.endpoints.retrieve(endpoint.id)
-    print(f"  State: {ep.state}")
-    if ep.state == "STARTED":
-        break
-    if ep.state in ("FAILED", "STOPPED"):
-        raise SystemExit(1)
-    time.sleep(15)
-
-# Query via endpoint.name (not the model ID)
-response = client.chat.completions.create(
+# Infer on the dedicated base URL (no trailing /v1). Use endpoint.name, not the ml_ id.
+inference = Together(base_url="https://api-inference.together.ai")
+response = inference.chat.completions.create(
     model=endpoint.name,
     messages=[{"role": "user", "content": "Hello!"}],
     max_tokens=128,
 )
-print(response.choices[0].message.content)
-
-# Delete the endpoint when done to stop charges
-client.endpoints.delete(endpoint.id)
 ```
 
-- Per-minute hosting charges while running
-- Guaranteed capacity and latency
-- No rate limits, high max load
-- Supports both LoRA and Full fine-tuned models
+- Per-minute hosting charges while replicas run (scale to 0/0 or `tg endpoints rm ep_... --force`)
+- Guaranteed capacity and latency; no hard rate limits
+- Supports LoRA and full fine-tuned models
+- Multi-adapter serving on one deployment: see [multi-LoRA deployment](https://docs.together.ai/docs/post-training/multi-lora-deployment) for post-training adapters on supported bases; otherwise one adapter per deployment
 
 ### Option 2: Download Weights
 

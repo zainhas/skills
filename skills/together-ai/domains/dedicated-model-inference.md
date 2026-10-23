@@ -13,19 +13,18 @@ The resource model has six parts: **Project → Model → Config → Endpoint �
   and count, optimization profile). The model determines the available configs.
 - **Replica** — one model instance on its own dedicated hardware.
 
-Inference goes to `https://api-inference.together.ai/v1` with the **endpoint string**
+Inference goes to `https://api-inference.together.ai` (SDK `base_url` without a trailing
+`/v1`; OpenAI-compatible clients still use `.../v1`) with the **endpoint string**
 (`<project_slug>/<endpoint_name>`) as the `model` parameter. Management goes through the
-Together CLI (`tg beta ...` — install with `uv tool install "together[cli]"`; `tg` and
-`together` are interchangeable), the `client.beta.*` SDK namespaces, or the `/v2` REST API at
-`https://api.together.ai`.
+Together CLI (`tg endpoints` / `tg models` — install with `uv tool install "together[cli]"` 3.0+;
+`tg` and `together` are interchangeable), the `client.endpoints` / `client.models` SDK
+namespaces, or the `/v2` REST API at `https://api.together.ai`.
 
-> **The legacy v1 dedicated endpoints API is retired.** The old flow (`client.endpoints.create`
-> with `model=` + `hardware=`, hardware IDs like `1x_nvidia_h100_80gb_sxm`, the `together
-> endpoints` CLI *without* `beta`) no longer accepts new endpoints: `POST /v1/endpoints`,
-> `client.endpoints.create(...)`, and `tg endpoints create` return
-> `endpoints_v1_create_access_disabled` (HTTP 403), and a stopped/paused v1 endpoint can't be
-> restarted. Already-running v1 endpoints keep serving until further notice; everything new —
-> and any redeploy of a stopped v1 endpoint — uses the v2 flow this guide describes.
+> **The legacy v1 dedicated endpoints API is retired.** In SDK/CLI 3.0, `client.endpoints` and
+> `tg endpoints` manage dedicated model inference (this guide). The old v1 create/list-hardware
+> methods are removed from the SDKs. Already-running v1 endpoints keep serving until further
+> notice; manage remaining ones via the [v1 REST API](https://docs.together.ai/docs/dedicated-endpoints/migrate-from-v1#manage-remaining-v1-endpoints).
+> Everything new uses the flow below.
 
 Hand-offs: the request shape for inference is the same as serverless, so
 `domains/chat-completions.md` covers calling the model; training is `domains/fine-tuning.md`;
@@ -33,13 +32,13 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
 
 ## Workflow
 
-1. Pick a model: `tg beta models public` (or upload custom weights first).
+1. Pick a model: `tg models public` (or upload custom weights first).
 2. Pick a config/precision: read the model's `deploymentProfiles` (they carry `quantization`
-   like `BF16`/`FP8`, `gpuCount`, and the exact `model`+`config` resource names). `tg beta
+   like `BF16`/`FP8`, `gpuCount`, and the exact `model`+`config` resource names). `tg
    models configs <id>` is often empty for catalog architectures — see
    [models-and-configs.md](references/dedicated-model-inference/models-and-configs.md). `deploy` auto-picks only when the
    model has a single profile.
-3. Deploy: `tg beta endpoints deploy <model> --endpoint <name>` — creates the
+3. Deploy: `tg endpoints deploy <model> --endpoint <name>` — creates the
    endpoint, attaches a deployment, and routes 100% of traffic in one step. For a public
    catalog model with one profile, pass its **name** (`Qwen/Qwen2.5-7B-Instruct`); the catalog
    `ml_`/`arch_` ID is owned by a platform project and won't resolve as a `deploy`/`ab`
@@ -47,16 +46,16 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
    bare-name deploy errors — pass the chosen profile's full resolved `model` resource path as
    the positional plus its `--config` (see models-and-configs.md).
 4. Poll until `status.state` is `DEPLOYMENT_STATE_READY`. The CLI `get` now accepts an
-   endpoint **or** deployment ID: `tg beta endpoints get dep_... --json | jq -r '.status.state'`
+   endpoint **or** deployment ID: `tg endpoints get dep_... --json | jq -r '.status.state'`
    is the scripted polling loop; the SDK equivalent is
-   `client.beta.endpoints.deployments.retrieve(dep_id, project_id=..., endpoint_id=...)`.
+   `client.endpoints.deployments.retrieve(dep_id, project_id=..., endpoint_id=...)`.
    First-time provisioning commonly takes up to ~20 minutes.
-5. Send requests to `https://api-inference.together.ai/v1` with the endpoint string as `model`.
-6. Scale, reconfigure, or set traffic weights with `tg beta endpoints update <dep_id>`
+5. Send requests to `https://api-inference.together.ai` with the endpoint string as `model`.
+6. Scale, reconfigure, or set traffic weights with `tg endpoints update <dep_id>`
    (`--min/--max-replicas`, `--scaling-metric`/`--scaling-target`, `--traffic-weight`); split traffic or
    experiment as needed.
-7. Clean up: `tg beta endpoints update <dep_id> --min-replicas 0 --max-replicas 0` to stop
-   billing, or `tg beta endpoints rm <ep_id> --force` to tear everything down (it scales
+7. Clean up: `tg endpoints update <dep_id> --min-replicas 0 --max-replicas 0` to stop
+   billing, or `tg endpoints rm <ep_id> --force` to tear everything down (it scales
    deployments to zero itself).
 
 ## Rules
@@ -68,17 +67,19 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
   or delete when the user is done; a forgotten deployment bills until someone stops it. A
   deployment with an inactivity timeout cannot take part in a rollout.
 - **A `READY` deployment serves nothing until it's in the endpoint's traffic split.** The CLI's
-  `deploy` routes automatically; otherwise set a weight with `tg beta endpoints update <dep_id>
+  `deploy` routes automatically; otherwise set a weight with `tg endpoints update <dep_id>
   --traffic-weight N` (upserts one entry) or replace the split via SDK
   `endpoints.update(traffic_split=[...])`. HTTP 400 `endpoint_not_configured` on a READY
   deployment means it is missing from the split or has weight 0; 400 `endpoint_not_ready` means
   no deployment behind the endpoint is running.
 - **Management IDs vs endpoint string.** Management calls take IDs (`ep_`, `dep_`, `cr_`, `ml_`,
   `abx_`, `exp_`); inference takes the endpoint string `<project_slug>/<endpoint_name>`.
-- **The SDK requires `project_id` on every method** — derive it with `client.whoami().project_id`.
-  The SDK also takes models/configs as resource names (`projects/{p}/models/{ml}`,
-  `projects/{p}/configs/{cr}`), while the CLI takes bare IDs. Use the config's own `projectId`
-  (often a platform project) when building its resource name.
+- **The SDK requires `project_id` on every method.** Prefer `Together(project_id=...)` /
+  `TOGETHER_PROJECT_ID`, or read it from `client.whoami()`: for a project API key,
+  `identity.type == "project_api_key"` and the ID is `identity.project.id` (not a flat
+  `project_id` field). The SDK also takes models/configs as resource names
+  (`projects/{p}/models/{ml}`, `projects/{p}/configs/{cr}`), while the CLI takes bare IDs.
+  Use the config's own `projectId` (often a platform project) when building its resource name.
 - **Traffic weights are relative capacity, not percentages.** Share = weight × ready replicas.
   Prefer shifting traffic by changing replica counts; keep weights stable.
 - **Scale-to-zero is all-or-nothing:** `min_replicas: 0` with a positive `max_replicas` is
@@ -102,8 +103,8 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
   endpoint, wait for `READY`, then shift traffic gradually with `--traffic-weight` (and
   replica counts), watching the dashboard between steps. Take the old deployment out with
   `--traffic-weight 0`, then scale it down and delete it.
-- The `client.beta.*` SDK surface and `together beta` CLI are **beta**: pin a current SDK
-  release (`uv pip install --upgrade together`) and expect the surface to evolve.
+- **Require SDK/CLI 3.0+** for DMI (`uv pip install --upgrade "together>=3.0.0"` /
+  `uv tool upgrade together`). Types live in `together.types` (not `together.types.beta`).
 
 ## Finishing and teardown
 
@@ -115,10 +116,10 @@ These come from runs that did the hard part and then failed at the end.
   must stop, list exactly what is still running and the command that checks it.
 - **Teardown is a loop, not one call** (deletion order is in Rules above). A 409 while deleting
   means a deployment is still stopping: poll until `STOPPED`, then retry the delete. You are done
-  only when `tg beta endpoints ls` no longer shows the endpoint.
+  only when `tg endpoints ls` no longer shows the endpoint.
 - **Measure, do not assume.** Record wall-clock timestamps when a test starts and ends, and report
   the measured duration, not the planned one. For autoscaling, align latency samples to the
-  scale-up and scale-down times in the endpoint's events feed (`tg beta endpoints events EP_ID
+  scale-up and scale-down times in the endpoint's events feed (`tg endpoints events EP_ID
   --json`, or api-reference.md, Events Feed),
   not to when you expected scaling to happen. Report an observed split from counted `x-cluster`
   headers, as described in Rules.
@@ -130,10 +131,10 @@ only for the detail named in its row, and read just that section; each starts wi
 
 | File | Lines | Contains | Open when |
 |---|---|---|---|
-| [scripts/dedicated-model-inference/deploy_model.py](scripts/dedicated-model-inference/deploy_model.py) | 254 | SDK path: deploy, poll to READY, infer on the dedicated base URL, scale, clean up | scripting the lifecycle in Python |
-| [scripts/dedicated-model-inference/upload_custom_model.py](scripts/dedicated-model-inference/upload_custom_model.py) | 145 | upload custom weights or a LoRA adapter, then deploy | serving your own weights |
-| [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
-| [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
+| [scripts/dedicated-model-inference/deploy_model.py](scripts/dedicated-model-inference/deploy_model.py) | 257 | SDK path: deploy, poll to READY, infer on the dedicated base URL, scale, clean up | scripting the lifecycle in Python |
+| [scripts/dedicated-model-inference/upload_custom_model.py](scripts/dedicated-model-inference/upload_custom_model.py) | 148 | upload custom weights or a LoRA adapter, then deploy | serving your own weights |
+| [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg endpoints` and `tg models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
+| [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 481 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
 | [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
 | [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
 
@@ -142,6 +143,7 @@ only for the detail named in its row, and read just that section; each starts wi
 - [Dedicated Model Inference overview](https://docs.together.ai/docs/dedicated-endpoints/overview)
 - [Quickstart](https://docs.together.ai/docs/dedicated-endpoints/quickstart)
 - [Concepts](https://docs.together.ai/docs/dedicated-endpoints/concepts)
-- [CLI reference: beta endpoints](https://docs.together.ai/reference/cli/endpoints-beta)
-- [CLI reference: beta models](https://docs.together.ai/reference/cli/models-beta)
+- [CLI reference: endpoints](https://docs.together.ai/reference/cli/endpoints)
+- [CLI reference: models](https://docs.together.ai/reference/cli/models)
+- [SDK v3 migration](https://docs.together.ai/docs/sdk-v3-migration-guide)
 - [Migrate from v1](https://docs.together.ai/docs/dedicated-endpoints/migrate-from-v1)

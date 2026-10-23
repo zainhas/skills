@@ -51,7 +51,7 @@ async function main() {
   console.log(`Wrote ${requests.length} requests to ${inputPath}`);
 
   // --- 2. Upload input file ---
-  const fileResp = await client.files.upload(inputPath, "batch-api", false);
+  const fileResp = await client.files.upload(inputPath, "batch-api");
   const fileId = fileResp.id;
   console.log(`Uploaded file: ${fileId}`);
 

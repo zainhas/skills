@@ -94,13 +94,13 @@ async function imageToVideo(): Promise<void> {
     model: "minimax/video-01-director",
     width: 1366,
     height: 768,
-    frame_images: [
+    media: { frame_images: [
       {
         input_image:
           "https://cdn.pixabay.com/photo/2020/05/20/08/27/cat-5195431_1280.jpg",
         frame: "first",
       },
-    ],
+    ] },
   });
   console.log(`Job ID: ${job.id}`);
   await waitForVideo(job.id);
