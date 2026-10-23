@@ -343,13 +343,15 @@ Multimodal content (vision models):
 ## OpenAI Compatibility
 
 Migrate from the OpenAI SDK by changing the base URL and API key while keeping the chat/completions
-shape the same:
+shape the same. Default serverless is `https://api.together.ai/v1`. For US-only or Canada-only
+inference processing, use `https://us-api.together.ai/v1` or `https://ca-api.together.ai/v1`
+(1.25× rates; model lists differ — see `domains/chat-completions.md`).
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.together.xyz/v1",
+    base_url="https://api.together.ai/v1",
     api_key="YOUR_TOGETHER_API_KEY",
 )
 response = client.chat.completions.create(
