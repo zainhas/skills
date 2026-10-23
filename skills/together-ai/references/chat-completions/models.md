@@ -67,6 +67,28 @@ structured outputs are supported.
 
 Start with `Qwen/Qwen3.5-9B` unless the task needs a larger model.
 
+## Geo-specific inference (US / Canada)
+
+Send requests to `https://api-us.together.ai/v1` or `https://api-ca.together.ai/v1` to keep
+inference processing in that geography (same API key and model IDs; 1.25× standard rates).
+`api.together.ai` does not guarantee either geography. Snapshot from
+[geo-specific inference](https://docs.together.ai/docs/serverless/geo-specific-inference)
+(mintlify-docs#1695); verify against the live page before relying on a model.
+
+| API model ID | United States | Canada |
+|-------------|:-------------:|:------:|
+| `moonshotai/Kimi-K3` | Yes | No |
+| `zai-org/GLM-5.3` | Yes | Yes |
+| `zai-org/GLM-5.3-Flash` | No | Yes |
+| `zai-org/GLM-5.2` | Yes | Yes |
+| `deepseek-ai/DeepSeek-V4.1-Flash` | Yes | Yes |
+| `deepseek-ai/DeepSeek-V4.1-Flash-1017` | Yes | No |
+| `deepseek-ai/DeepSeek-V4-Pro-0813` | Yes | Yes |
+| `MiniMaxAI/MiniMax-M3` | Yes | No |
+
+Per-model US/Canada prices: [serverless models](https://docs.together.ai/docs/serverless/models)
+(US-only and Canada-only sections).
+
 ## Moderation Models
 
 No moderation model is served serverless, and none is listed in the dedicated deployment catalog

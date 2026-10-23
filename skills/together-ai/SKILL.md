@@ -1,6 +1,6 @@
 ---
 name: together-ai
-description: "Together AI platform skill covering every product area: chat completions and streaming text generation, tool calling, structured outputs, reasoning and vision models; image generation and editing (FLUX, Kontext); video generation; text-to-speech and speech-to-text; embeddings and reranking; fine-tuning (LoRA, full, DPO, VLM, BYOM); batch inference; LLM-as-a-judge evaluations; code sandboxes; dedicated model inference (tg beta endpoints, deployments, autoscaling, traffic splits, model and LoRA uploads); dedicated containers (Sprocket, Jig); GPU clusters (Kubernetes, Slurm) with Kueue or Volcano scheduling; and TogetherLink (tlink, tclaude) for running Claude Code, Codex, OpenCode, or desktop apps on Together models. Reach for it whenever the user builds, debugs, deploys, trains, evaluates, or operates anything on Together AI, or mentions the together SDK, the tg CLI, TogetherLink, api.together.ai, TOGETHER_API_KEY, or a Together-hosted model id. The skill body routes each request to the matching domain guide."
+description: "Together AI platform skill: chat completions (incl. US/Canada geo-specific serverless), streaming, tool calling, structured outputs, reasoning and vision; images (FLUX, Kontext); video; TTS/STT; embeddings/reranking; fine-tuning (LoRA, full, DPO, VLM, BYOM); batch inference; LLM-as-a-judge evaluations; code sandboxes; dedicated model inference (endpoints, deployments, autoscaling, traffic splits, uploads); dedicated containers (Sprocket, Jig); GPU clusters (Kubernetes, Slurm) with Kueue or Volcano; TogetherLink (tlink, tclaude) for Claude Code, Codex, OpenCode, or desktop apps on Together models. Use when the user builds, debugs, deploys, trains, evaluates, or operates on Together AI, or mentions the together SDK, tg CLI, TogetherLink, api.together.ai, api-us.together.ai, api-ca.together.ai, TOGETHER_API_KEY, or a Together-hosted model id. The skill body routes each request to the matching domain guide."
 ---
 
 # Together AI
@@ -25,7 +25,7 @@ only when it holds a detail you need. Paths are relative to this skill's directo
 
 | Guide | Use for |
 |---|---|
-| `domains/chat-completions.md` | text generation, streaming, multi-turn chat, tool calling, JSON output, reasoning and vision models |
+| `domains/chat-completions.md` | text generation, streaming, multi-turn chat, tool calling, JSON output, reasoning and vision models; US/Canada geo-specific serverless endpoints |
 | `domains/images.md` | text-to-image, image editing (Kontext), reference images |
 | `domains/video.md` | text-to-video, image-to-video, keyframes |
 | `domains/audio.md` | TTS (REST, streaming, WebSocket), transcription, translation, diarization, realtime STT |
@@ -61,8 +61,10 @@ calling the API from the user's own code is `chat-completions` or `images`. A ta
 - **Do not retry errors that cannot succeed.** 400 non-serverless model, 401, 402
   `insufficient balance` (account-wide; another model will not help), 403, and 404 need a different
   input or a human. A 403 `third_party_data_sharing_blocked` means the organization must enable
-  third-party data sharing for that partner-hosted model (for example FLUX.2 or Qwen Plus). Retry
-  only 429 and 5xx, with backoff, a few times, then report.
+  third-party data sharing for that partner-hosted model (for example FLUX.2 or Qwen Plus). A 404
+  `region_unavailable` on `api-us`/`api-ca` means the model is not in that geography: pick a
+  supported model on the same endpoint; do not fall back to `api.together.ai` when residency is
+  required. Retry only 429 and 5xx, with backoff, a few times, then report.
 - **v2 SDK only.** v1 names raise `AttributeError`: `create_batch` is `batches.create`, `get_batch`
   is `batches.retrieve`, `files.retrieve_content` is `files.content`, `evaluation.create` is
   `evals.create`, `code_interpreter.run` is `code_interpreter.execute`, `file_id=` is
