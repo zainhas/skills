@@ -391,7 +391,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-external-base-url", help="Custom OpenAI-compatible base URL for the target")
     parser.add_argument(
         "--model-a",
-        default="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        default="deepseek-ai/DeepSeek-V4-Pro-0813",
         help="Model A for compare evaluations",
     )
     parser.add_argument(

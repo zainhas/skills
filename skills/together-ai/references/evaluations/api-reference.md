@@ -340,7 +340,7 @@ evaluation = client.evals.create(
             "system_template": "Assess which model has smarter and more helpful responses.",
         },
         "model_a": {
-            "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+            "model": "deepseek-ai/DeepSeek-V4-Pro-0813",
             "model_source": "serverless",
             "system_template": "You are a helpful assistant.",
             "input_template": "{{prompt}}",
@@ -371,7 +371,7 @@ const evaluation = await client.evals.create({
         "Assess which model has smarter and more helpful responses.",
     },
     model_a: {
-      model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      model: "deepseek-ai/DeepSeek-V4-Pro-0813",
       model_source: "serverless",
       system_template: "You are a helpful assistant.",
       input_template: "{{prompt}}",
@@ -403,7 +403,7 @@ curl -X POST "https://api.together.xyz/v1/evaluation" \
         "system_template": "Assess which model has smarter and more helpful responses."
       },
       "model_a": {
-        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "model": "deepseek-ai/DeepSeek-V4-Pro-0813",
         "model_source": "serverless",
         "system_template": "You are a helpful assistant.",
         "input_template": "{{prompt}}",
