@@ -825,7 +825,7 @@ workflow.
 
 ## Supported Models
 
-Serverless models that support this as of 2026-10-07, per the [serverless catalog](https://docs.together.ai/docs/serverless/models). Availability changes; a request with `max_tokens=1` confirms a model is live.
+Serverless models that support this as of 2026-10-26, per the [serverless catalog](https://docs.together.ai/docs/serverless/models). Availability changes; a request with `max_tokens=1` confirms a model is live.
 
 - `moonshotai/Kimi-K3`
 - `zai-org/GLM-5.3`
@@ -834,8 +834,8 @@ Serverless models that support this as of 2026-10-07, per the [serverless catalo
 - `deepseek-ai/DeepSeek-V4-Pro-0813`
 - `deepseek-ai/DeepSeek-V4-Flash-0731`
 - `deepseek-ai/DeepSeek-V4.1-Flash`
-- `thinkingmachines/Inkling`
-- `MiniMaxAI/MiniMax-M3`
+- `MiniMaxAI/MiniMax-M3.1-Flash`
+- `meta-models/Muse-Spark-Open-816B-A42B`
 - `Qwen/Qwen3.5-9B`
 - `openai/gpt-oss-120b`
 - `meta-llama/Llama-3.3-70B-Instruct-Turbo`
