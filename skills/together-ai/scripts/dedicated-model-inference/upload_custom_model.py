@@ -12,7 +12,7 @@ Usage:
     python upload_custom_model.py deploy --model ml_abc123 --config cr_abc123 --endpoint my-custom-model
 
 Requires:
-    uv pip install --upgrade together   # a release with the beta DMI surface (client.beta.*)
+    uv add together   # a release with the beta DMI surface (client.beta.*)
     export TOGETHER_API_KEY=your_key
 
 Upload requirements:

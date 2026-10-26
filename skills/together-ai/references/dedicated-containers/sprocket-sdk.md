@@ -22,7 +22,7 @@ Sprocket is the worker framework for Together Dedicated Containers. It handles j
 ## Installation
 
 ```shell
-pip install sprocket --extra-index-url https://pypi.together.ai/
+uv add sprocket --index https://pypi.together.ai/
 # or with Together's private PyPI in pyproject.toml:
 [[tool.uv.index]]
 name = "together-pypi"

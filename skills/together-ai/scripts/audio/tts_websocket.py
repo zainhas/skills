@@ -10,7 +10,7 @@ Usage:
     python tts_websocket.py --text "Hello from Together AI" --model hexgrad/Kokoro-82M --voice af_alloy
 
 Requirements:
-    pip install websockets
+    uv add websockets
     export TOGETHER_API_KEY=your_key
 """
 

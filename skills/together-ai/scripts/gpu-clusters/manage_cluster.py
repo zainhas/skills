@@ -11,7 +11,7 @@ Usage:
     python manage_cluster.py demo
 
 Requires:
-    uv pip install "together>=2.0.0"
+    uv add "together>=2.0.0"
     export TOGETHER_API_KEY=your_key
 """
 

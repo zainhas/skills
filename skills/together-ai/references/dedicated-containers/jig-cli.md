@@ -18,9 +18,9 @@
 ## Installation
 
 ```shell
-uv pip install "together>=2.0.0"
-# or
-uv tool install together
+uv add "together>=2.0.0"
+# CLI (jig commands):
+uv tool install "together[cli]" --upgrade
 ```
 
 Jig commands are under `together beta jig`.

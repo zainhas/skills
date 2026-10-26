@@ -103,7 +103,7 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
   replica counts), watching the dashboard between steps. Take the old deployment out with
   `--traffic-weight 0`, then scale it down and delete it.
 - The `client.beta.*` SDK surface and `together beta` CLI are **beta**: pin a current SDK
-  release (`uv pip install --upgrade together`) and expect the surface to evolve.
+  release (`uv add together`) and expect the surface to evolve.
 
 ## Finishing and teardown
 

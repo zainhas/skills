@@ -11,14 +11,16 @@ only when it holds a detail you need. Paths are relative to this skill's directo
 
 ## Setup
 
-- Auth: `TOGETHER_API_KEY` in the environment. Python: `uv pip install --upgrade "together>=2.0.0"`,
-  then `client = Together()`. TypeScript: `npm install together-ai`, then `new Together()`. The
+- Auth: `TOGETHER_API_KEY` in the environment. Python: `uv add "together>=2.0.0"` (needs a
+  `pyproject.toml`; run `uv init --no-workspace` first in an empty directory), then
+  `client = Together()`. TypeScript: `npm install together-ai`, then `new Together()`. The
   Python SDK and this skill's scripts use only the API key. From CLI 2.41, `tg login` signs in
   through a browser device flow (`--no-browser` prints the URL) and `tg switch` picks a project;
   it is interactive, so ask the user to run it. The CLI also accepts `TOGETHER_API_KEY`.
 - CLI: `uv tool install "together[cli]"` gives `tg` (alias `together`), used for dedicated
-  inference, clusters, and fine-tuning. If `tg beta endpoints` or `tg beta models` is missing, the
-  CLI is outdated: `uv tool upgrade together`. From 2.40, `tg` prints JSON by default when an AI
+  inference, clusters, and fine-tuning. To install or upgrade, run
+  `uv tool install "together[cli]" --upgrade` (do not use `uv tool upgrade`: it keeps the first
+  install's extras and ignores `[cli]`). From 2.40, `tg` prints JSON by default when an AI
   agent runs it; pass `--no-json` for tables.
 
 ## Guides

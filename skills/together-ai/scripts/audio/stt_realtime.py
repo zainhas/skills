@@ -10,7 +10,7 @@ Usage:
     python stt_realtime.py audio.pcm --model openai/whisper-large-v3
 
 Requirements:
-    pip install websockets
+    uv add websockets
     export TOGETHER_API_KEY=your_key
 """
 

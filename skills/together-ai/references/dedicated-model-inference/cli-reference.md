@@ -19,8 +19,8 @@ and wires up the underlying resources.
 ## Installation and invocation
 
 ```bash
-uv tool install "together[cli]"
-tg --version                      # check; upgrade with: uv tool upgrade together
+uv tool install "together[cli]" --upgrade
+tg --version
 ```
 
 `tg` and `together` are interchangeable entry points (docs use `tg`). Project scoping: the CLI

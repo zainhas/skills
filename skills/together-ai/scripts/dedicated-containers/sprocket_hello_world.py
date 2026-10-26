@@ -15,8 +15,8 @@ Usage:
     together beta jig deploy
 
 Requires:
-    pip install sprocket --extra-index-url https://pypi.together.ai/
-    # For deployment: uv pip install "together>=2.0.0"
+    uv add sprocket --index https://pypi.together.ai/
+    # For deployment CLI: uv tool install "together[cli]" --upgrade
 
 Example pyproject.toml:
     [project]

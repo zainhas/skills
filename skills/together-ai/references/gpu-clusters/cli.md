@@ -22,10 +22,10 @@ uv tool install "together[cli]"
 tg --help
 ```
 
-Upgrade with:
+Install or upgrade with:
 
 ```shell
-uv tool upgrade "together[cli]"
+uv tool install "together[cli]" --upgrade
 ```
 
 For CI/CD, invoke the CLI directly with `uvx` to avoid a separate install step:
