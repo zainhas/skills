@@ -385,13 +385,13 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_INPUT_TEMPLATE,
         help="Jinja2 input template for model-based evaluation targets",
     )
-    parser.add_argument("--max-tokens", type=int, default=512, help="Maximum generation tokens")
+    parser.add_argument("--max-tokens", type=int, default=4096, help="Maximum generation tokens (use >=4096 for reasoning targets such as Qwen/Qwen3.5-9B)")
     parser.add_argument("--temperature", type=float, default=0.7, help="Generation temperature")
     parser.add_argument("--eval-external-api-token", help="API key for an external evaluation target")
     parser.add_argument("--eval-external-base-url", help="Custom OpenAI-compatible base URL for the target")
     parser.add_argument(
         "--model-a",
-        default="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        default="deepseek-ai/DeepSeek-V4-Pro-0813",
         help="Model A for compare evaluations",
     )
     parser.add_argument(

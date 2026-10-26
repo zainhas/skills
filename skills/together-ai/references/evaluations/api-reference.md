@@ -97,7 +97,7 @@ When both `model_a` and `model_b` are model configuration objects (not pre-gener
 | `model_source` | string | Yes | `serverless`, `dedicated`, or `external` |
 | `system_template` | string | Yes | System prompt for generation |
 | `input_template` | string | Yes | Jinja2 input template (e.g., `{{prompt}}`) |
-| `max_tokens` | integer | Yes | Maximum generation tokens |
+| `max_tokens` | integer | Yes | Maximum generation tokens. For reasoning targets (e.g. `Qwen/Qwen3.5-9B`), thinking tokens count against this budget; docs samples use 4096 so the answer is not truncated. |
 | `temperature` | float | Yes | Generation temperature (0 to 2) |
 | `num_workers` | integer | No | Concurrent workers for target inference. Defaults: `serverless` → 25, `dedicated` → 5 (minimum), `external` → 2 for first-party APIs or 20 for proxy endpoints. Override to tune throughput. |
 | `external_api_token` | string | No | API key for external providers |
@@ -184,7 +184,7 @@ evaluation = client.evals.create(
             "model_source": "serverless",
             "system_template": "You are a helpful assistant.",
             "input_template": "{{prompt}}",
-            "max_tokens": 512,
+            "max_tokens": 4096,
             "temperature": 0.7,
         },
     },
@@ -212,7 +212,7 @@ const evaluation = await client.evals.create({
       model_source: "serverless",
       system_template: "You are a helpful assistant.",
       input_template: "{{prompt}}",
-      max_tokens: 512,
+      max_tokens: 4096,
       temperature: 0.7,
     },
   },
@@ -239,7 +239,7 @@ curl -X POST "https://api.together.xyz/v1/evaluation" \
         "model_source": "serverless",
         "system_template": "You are a helpful assistant.",
         "input_template": "{{prompt}}",
-        "max_tokens": 512,
+        "max_tokens": 4096,
         "temperature": 0.7
       },
       "input_data_file_path": "file-abc123"
@@ -267,7 +267,7 @@ evaluation = client.evals.create(
             "model_source": "serverless",
             "system_template": "You are a helpful assistant.",
             "input_template": "{{prompt}}",
-            "max_tokens": 512,
+            "max_tokens": 4096,
             "temperature": 0.7,
         },
     },
@@ -292,7 +292,7 @@ const evaluation = await client.evals.create({
       model_source: "serverless",
       system_template: "You are a helpful assistant.",
       input_template: "{{prompt}}",
-      max_tokens: 512,
+      max_tokens: 4096,
       temperature: 0.7,
     },
   },
@@ -319,7 +319,7 @@ curl -X POST "https://api.together.xyz/v1/evaluation" \
         "model_source": "serverless",
         "system_template": "You are a helpful assistant.",
         "input_template": "{{prompt}}",
-        "max_tokens": 512,
+        "max_tokens": 4096,
         "temperature": 0.7
       },
       "input_data_file_path": "file-abc123"
@@ -340,7 +340,7 @@ evaluation = client.evals.create(
             "system_template": "Assess which model has smarter and more helpful responses.",
         },
         "model_a": {
-            "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+            "model": "deepseek-ai/DeepSeek-V4-Pro-0813",
             "model_source": "serverless",
             "system_template": "You are a helpful assistant.",
             "input_template": "{{prompt}}",
@@ -352,7 +352,7 @@ evaluation = client.evals.create(
             "model_source": "serverless",
             "system_template": "You are a helpful assistant.",
             "input_template": "{{prompt}}",
-            "max_tokens": 512,
+            "max_tokens": 4096,
             "temperature": 0.7,
         },
     },
@@ -371,7 +371,7 @@ const evaluation = await client.evals.create({
         "Assess which model has smarter and more helpful responses.",
     },
     model_a: {
-      model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      model: "deepseek-ai/DeepSeek-V4-Pro-0813",
       model_source: "serverless",
       system_template: "You are a helpful assistant.",
       input_template: "{{prompt}}",
@@ -383,7 +383,7 @@ const evaluation = await client.evals.create({
       model_source: "serverless",
       system_template: "You are a helpful assistant.",
       input_template: "{{prompt}}",
-      max_tokens: 512,
+      max_tokens: 4096,
       temperature: 0.7,
     },
   },
@@ -403,7 +403,7 @@ curl -X POST "https://api.together.xyz/v1/evaluation" \
         "system_template": "Assess which model has smarter and more helpful responses."
       },
       "model_a": {
-        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "model": "deepseek-ai/DeepSeek-V4-Pro-0813",
         "model_source": "serverless",
         "system_template": "You are a helpful assistant.",
         "input_template": "{{prompt}}",
@@ -415,7 +415,7 @@ curl -X POST "https://api.together.xyz/v1/evaluation" \
         "model_source": "serverless",
         "system_template": "You are a helpful assistant.",
         "input_template": "{{prompt}}",
-        "max_tokens": 512,
+        "max_tokens": 4096,
         "temperature": 0.7
       },
       "input_data_file_path": "file-abc123"

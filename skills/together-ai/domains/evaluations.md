@@ -10,10 +10,11 @@ repeatable. To change a model rather than measure it, go to `domains/fine-tuning
 2. Upload the dataset as an eval file (`check=False`) and keep the file ID.
 3. Choose judge and target models explicitly. The evaluation service keeps its **own** serverless
    allowlist, separate from the main catalog; check it live (free):
-   `GET https://api.together.xyz/v1/evaluation/model-list?model_source=serverless`. On 2026-10-07
-   the live list and the docs table disagreed, so trust the endpoint. Models on both, and callable
-   serverless: `openai/gpt-oss-120b` (the docs' example judge),
-   `meta-llama/Llama-3.3-70B-Instruct-Turbo`, and `Qwen/Qwen3.5-9B`.
+   `GET https://api.together.xyz/v1/evaluation/model-list?model_source=serverless`. Trust the
+   endpoint over any cached table. Docs-synced examples (2026-10-26): `openai/gpt-oss-120b`
+   (the docs' example judge), `Qwen/Qwen3.5-9B` (classify/score sample target), and
+   `deepseek-ai/DeepSeek-V4-Pro-0813`. `meta-llama/Llama-3.3-70B-Instruct-Turbo` left serverless
+   and is no longer on the eval allowlist.
 4. `client.evals.create(...)`, poll status until it is terminal, then download the per-row results.
 
 ## Rules
@@ -23,6 +24,9 @@ repeatable. To change a model rather than measure it, go to `domains/fine-tuning
 - Vision evals need an `image_data_urls` column of base64 data URLs, and a vision-capable model
   and judge.
 - Keep judge configuration explicit; hidden defaults make results hard to interpret.
+- For reasoning targets such as `Qwen/Qwen3.5-9B`, thinking tokens count against `max_tokens`.
+  Set it high enough for thinking plus the answer (docs samples use 4096); too low yields empty
+  content and the judge grades unfinished reasoning.
 
 ## Open next
 
