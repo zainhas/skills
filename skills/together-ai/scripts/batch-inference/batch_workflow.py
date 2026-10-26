@@ -57,7 +57,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        default="meta-models/Muse-Glimmer-30B",
         help="Model to use when generating a sample batch payload",
     )
     parser.add_argument(

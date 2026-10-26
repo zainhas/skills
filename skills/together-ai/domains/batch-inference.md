@@ -20,9 +20,9 @@ waiting on, use `domains/chat-completions.md` instead.
 
 - `client.batches.create()` returns a wrapper: the batch is `response.job` (`response.job.id`).
   `client.batches.retrieve()` returns the batch directly.
-- The 50% discount applies to `meta-llama/Llama-3.3-70B-Instruct-Turbo` and
-  `openai/whisper-large-v3` (audio batches use `/v1/audio/transcriptions`); other models run at
-  standard rates. Batches can also target a dedicated endpoint, without the discount.
+- The 50% discount applies to `openai/whisper-large-v3` (audio batches use
+  `/v1/audio/transcriptions` and `/v1/audio/translations`); other models run at standard rates.
+  Batches can also target a dedicated endpoint, without the discount.
 - Keep `custom_id` unique and meaningful; results come back unordered.
 - Batch is for independent requests; shared conversation state belongs in chat.
 - Always read the error file; failed rows appear only there.
@@ -34,7 +34,7 @@ waiting on, use `domains/chat-completions.md` instead.
 | File | Lines | Contains | Open when |
 |---|---|---|---|
 | [scripts/batch-inference/batch_workflow.py](scripts/batch-inference/batch_workflow.py) (.ts) | 170 | build JSONL, upload, create, poll, download, reconcile | running a batch end to end |
-| [references/batch-inference/api-reference.md](references/batch-inference/api-reference.md) | 307 | JSONL input and output formats, job object and statuses, discounted and excluded models, limits, error codes, CLI | a format detail, status, limit, or error |
+| [references/batch-inference/api-reference.md](references/batch-inference/api-reference.md) | 306 | JSONL input and output formats, job object and statuses, discounted and excluded models, limits, error codes, CLI | a format detail, status, limit, or error |
 
 ## Docs
 

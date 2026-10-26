@@ -265,7 +265,7 @@ client = Together()
 
 # Sentiment classification
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    model="meta-models/Muse-Glimmer-30B",
     temperature=0.2,
     max_tokens=10,
     messages=[
@@ -281,7 +281,7 @@ print(response.choices[0].message.content)  # "positive"
 
 # Phone number pattern
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    model="meta-models/Muse-Glimmer-30B",
     messages=[{"role": "user", "content": "Generate a US phone number for a pizza shop"}],
     response_format={"type": "regex", "pattern": r"\(\d{3}\) \d{3}-\d{4}"},
 )
@@ -294,7 +294,7 @@ import Together from "together-ai";
 const together = new Together();
 
 const completion = await together.chat.completions.create({
-  model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  model: "meta-models/Muse-Glimmer-30B",
   temperature: 0.2,
   max_tokens: 10,
   messages: [
@@ -322,7 +322,7 @@ curl -X POST "https://api.together.xyz/v1/chat/completions" \
   -H "Authorization: Bearer $TOGETHER_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "model": "meta-models/Muse-Glimmer-30B",
     "temperature": 0.2,
     "max_tokens": 10,
     "messages": [
@@ -514,13 +514,13 @@ Serverless models that support this as of 2026-10-07, per the [serverless catalo
 - `zai-org/GLM-5.3-Flash`
 - `zai-org/GLM-5.2`
 - `deepseek-ai/DeepSeek-V4-Pro-0813`
-- `deepseek-ai/DeepSeek-V4-Flash-0731`
+- `deepseek-ai/DeepSeek-V4.1-Flash-1017`
 - `deepseek-ai/DeepSeek-V4.1-Flash`
 - `thinkingmachines/Inkling`
 - `MiniMaxAI/MiniMax-M3`
 - `Qwen/Qwen3.5-9B`
 - `openai/gpt-oss-120b`
-- `meta-llama/Llama-3.3-70B-Instruct-Turbo`
+- `meta-models/Muse-Glimmer-30B`
 
 ## Troubleshooting
 

@@ -33,7 +33,7 @@ Authentication: `Authorization: Bearer $TOGETHER_API_KEY`
 Each line is a JSON object with two required fields:
 
 ```json
-{"custom_id": "request-1", "body": {"model": "meta-llama/Llama-3.3-70B-Instruct-Turbo", "messages": [{"role": "user", "content": "Hello"}], "max_tokens": 200}}
+{"custom_id": "request-1", "body": {"model": "meta-models/Muse-Glimmer-30B", "messages": [{"role": "user", "content": "Hello"}], "max_tokens": 200}}
 ```
 
 - `custom_id` (string, required): Unique identifier for tracking (max 64 chars)
@@ -44,7 +44,7 @@ Each line is a JSON object with two required fields:
 Each line in the output file is a JSON object keyed by `custom_id`:
 
 ```json
-{"custom_id": "request-1", "response": {"status_code": 200, "body": {"id": "...", "object": "chat.completion", "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo", "choices": [{"index": 0, "message": {"role": "assistant", "content": "Hello!"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 12, "completion_tokens": 3, "total_tokens": 15}}}}
+{"custom_id": "request-1", "response": {"status_code": 200, "body": {"id": "...", "object": "chat.completion", "model": "meta-models/Muse-Glimmer-30B", "choices": [{"index": 0, "message": {"role": "assistant", "content": "Hello!"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 12, "completion_tokens": 3, "total_tokens": 15}}}}
 ```
 
 To extract the assistant's reply from a result line:
@@ -238,7 +238,6 @@ curl -X GET "https://api.together.xyz/v1/batches" \
 
 ## Models with 50% Discount
 
-- `meta-llama/Llama-3.3-70B-Instruct-Turbo`
 - `openai/whisper-large-v3` (audio batches through `/v1/audio/transcriptions` and
   `/v1/audio/translations`)
 

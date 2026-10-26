@@ -25,7 +25,7 @@ async function main() {
     {
       custom_id: "req-1",
       body: {
-        model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        model: "meta-models/Muse-Glimmer-30B",
         messages: [{ role: "user", content: "What is the capital of France?" }],
         max_tokens: 128,
       },
@@ -33,7 +33,7 @@ async function main() {
     {
       custom_id: "req-2",
       body: {
-        model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        model: "meta-models/Muse-Glimmer-30B",
         messages: [
           {
             role: "user",

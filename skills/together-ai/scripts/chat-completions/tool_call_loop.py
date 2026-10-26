@@ -24,7 +24,7 @@ from together import Together
 
 client = Together()
 
-MODEL = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+MODEL = "meta-models/Muse-Glimmer-30B"
 
 # --- 1. Define tools ---
 tools = [

@@ -334,8 +334,8 @@ read both shapes defensively.
   `zai-org/GLM-5.2`) nest them OpenAI-style:
   - `usage.completion_tokens_details.reasoning_tokens`
   - `usage.prompt_tokens_details.cached_tokens`
-- **Some non-reasoning models** (for example `meta-llama/Llama-3.3-70B-Instruct-Turbo`) return
-  `cached_tokens` flat at the top level of `usage`, with no `*_details` objects.
+- **Some non-reasoning models** return `cached_tokens` flat at the top level of `usage`, with
+  no `*_details` objects.
 
 A client configured for only one shape will silently return `0` for all others. Fall back across
 both locations:
