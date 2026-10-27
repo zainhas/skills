@@ -32,10 +32,25 @@ print(resp.choices[0].message.content)
 - Image input: put `{"type": "image_url", "image_url": {"url": ...}}` parts in the user message's
   `content` list and use a vision model (`Qwen/Qwen3.5-9B`, `MiniMaxAI/MiniMax-M3`,
   `moonshotai/Kimi-K3`).
+- Geo-specific inference (US or Canada processing, no GPUs to provision): point the client at
+  `us-api.together.ai` or `ca-api.together.ai` with the same API key and model IDs.
+  `api.together.ai` does not guarantee either geography. Both geographies cost 1.25× standard
+  serverless rates (input, cached input, and output). Model lists differ by geography; see
+  [geo-specific inference](https://docs.together.ai/docs/serverless/geo-specific-inference).
+  Together SDKs take the host without `/v1` (they append `/v1` to each path); OpenAI-compatible
+  clients and direct HTTP keep `/v1` on the base URL.
+
+```python
+client = Together(base_url="https://us-api.together.ai")  # or https://ca-api.together.ai
+```
 
 ## Rules
 
 - Keep the full `messages` history across turns; do not rebuild context from final text only.
+- On a geo endpoint, a 404 `region_unavailable` means the model is not offered there. Retry only
+  on that same endpoint with a supported model; do not fall back to `api.together.ai` when the
+  workload requires that geography. The guarantee is inference processing location only, not
+  storage, logs, or routing.
 - Streams can end with a usage-only chunk whose `choices` list is empty (GPT-OSS always sends
   one). Check `chunk.choices` before reading `chunk.choices[0]`.
 - Tool calling is a loop, not one round trip: execute every tool call, append each result as a
@@ -76,8 +91,8 @@ Open a file only for the detail its row names. References over 100 lines start w
 | [scripts/chat-completions/reasoning_models.py](scripts/chat-completions/reasoning_models.py) (.ts) | 162 | reasoning field, effort levels, hybrid on/off toggles | using a reasoning model |
 | [scripts/chat-completions/async_parallel.py](scripts/chat-completions/async_parallel.py) | 50 | asyncio fan-out of independent requests | many requests and a user is waiting |
 | [scripts/chat-completions/debug_headers.py](scripts/chat-completions/debug_headers.py) (.ts) | 57 | raw response, rate-limit and routing headers | debugging latency, 429s, or routing |
-| [references/chat-completions/models.md](references/chat-completions/models.md) | 73 | model picks by use case, context lengths, vision and moderation models | choosing a model (verify it is live) |
-| [references/chat-completions/api-parameters.md](references/chat-completions/api-parameters.md) | 481 | every request parameter, message object, OpenAI-SDK compatibility, rate-limit tiers, HTTP status codes | a parameter or status code not covered above |
+| [references/chat-completions/models.md](references/chat-completions/models.md) | 98 | model picks by use case, context lengths, vision and moderation models, US/Canada geo availability | choosing a model (verify it is live) or a geo endpoint |
+| [references/chat-completions/api-parameters.md](references/chat-completions/api-parameters.md) | 484 | every request parameter, message object, OpenAI-SDK compatibility (incl. geo base URLs), rate-limit tiers, HTTP status codes | a parameter or status code not covered above |
 | [references/chat-completions/function-calling-patterns.md](references/chat-completions/function-calling-patterns.md) | 841 | six calling patterns (parallel, multi-step, ...), `tool_choice`, tools plus structured output, best practices, supported models | a tool pattern the script does not show |
 | [references/chat-completions/structured-outputs.md](references/chat-completions/structured-outputs.md) | 541 | the three JSON modes, reasoning plus JSON, streaming JSON, troubleshooting | JSON output fails to parse or validate |
 | [references/chat-completions/reasoning-models.md](references/chat-completions/reasoning-models.md) | 481 | reasoning model table, effort levels, hybrid toggles, output format, token accounting | tuning reasoning depth or cost |
@@ -86,6 +101,7 @@ Open a file only for the detail its row names. References over 100 lines start w
 
 - [Chat overview](https://docs.together.ai/docs/inference/chat/overview)
 - [Serverless models](https://docs.together.ai/docs/serverless/models)
+- [Geo-specific inference](https://docs.together.ai/docs/serverless/geo-specific-inference)
 - [Function calling](https://docs.together.ai/docs/inference/function-calling/overview)
 - [Structured outputs](https://docs.together.ai/docs/inference/chat/structured-outputs)
 - [Reasoning overview](https://docs.together.ai/docs/inference/chat/reasoning)
