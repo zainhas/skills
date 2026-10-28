@@ -9,6 +9,7 @@
 - [Scaling](#scaling)
 - [Storage](#storage)
 - [Health Checks](#health-checks)
+  - [Node Repair and Remediations](#node-repair-and-remediations)
 - [User Management](#user-management)
 - [Billing](#billing)
 - [Troubleshooting](#troubleshooting)
@@ -33,8 +34,8 @@
 ### Kubernetes Access
 
 ```shell
-# Get credentials
-together beta clusters get-credentials <CLUSTER_ID>
+# Get credentials (project admins only for admin kubeconfig)
+tg clusters get-credentials <CLUSTER_ID> --set-default-context --no-json
 export KUBECONFIG=$HOME/.kube/config
 
 # Verify
@@ -55,42 +56,43 @@ kubectl -n kubernetes-dashboard get secret \
 
 ### SSH Access
 
-Two SSH methods are supported. On Slurm clusters with OIDC enabled, pick one from the **SSH access method** selector in the cluster UI sidebar; the choice applies to the head node and all compute nodes. If OIDC is not configured on the cluster, only key-based SSH is available.
+Two SSH methods are supported. On Slurm clusters with OIDC enabled, pick one from the **SSH access method** selector in the cluster UI sidebar; the choice applies to the head node and all compute nodes. If OIDC is not configured on the cluster, only key-based SSH is available. Full walkthrough: [Connect over SSH](https://docs.together.ai/docs/gpu-clusters-ssh).
 
 | Method | How it works | Requirements |
 |--------|--------------|--------------|
-| **OIDC (Together CLI)** | Browser sign-in that mints a short-lived certificate, executed via `tg beta clusters ssh`. | Together CLI installed (`uv tool install "together[cli]"`, 2.20+, Python 3.10+). Choose a login name when prompted in the cluster UI. No SSH key required. |
-| **Key-based** | Standard `ssh -J` proxy jump through the cluster's bastion. | SSH public key uploaded at `api.together.ai/settings/ssh-key` before cluster creation. |
+| **OIDC (Together CLI)** | Browser sign-in that mints a short-lived certificate via `tg clusters ssh`. | Together CLI 2.40+ (`uv tool install "together[cli]"`), Python 3.10+. Login name is set once in SSH key settings. No SSH key required. |
+| **Key-based** | Standard `ssh -J` proxy jump through the cluster's bastion. | SSH public key uploaded at `api.together.ai/settings/ssh-key`. |
 
-The cluster UI's **Copy SSH command** (worker/compute) and **Copy head node SSH command** (Slurm login) buttons emit a command shaped for the selected method.
+`<LOCATION>` is the datacenter segment of node hostnames (for example `s2.ca-west-1b`), not the region name. The console **Copy SSH command** buttons fill every value.
 
 **Key-based commands:**
 
 ```shell
 # Worker node (Kubernetes) or Slurm compute node
-ssh -J <LOGIN>@ssh.<CLUSTER_ID>.<REGION>.cloud.together.ai <LOGIN>@<NODE_HOSTNAME>
+ssh -J <LOGIN>@ssh.t-<CLUSTER_ID>.<LOCATION>.cloud.together.ai <LOGIN>@<HOST>
 
 # Slurm login node
-ssh -J <LOGIN>@ssh.<CLUSTER_ID>.<REGION>.cloud.together.ai <LOGIN>@slurm-login
+ssh -J <LOGIN>@ssh.t-<CLUSTER_ID>.<LOCATION>.cloud.together.ai <LOGIN>@slurm-login
 ```
 
 **OIDC commands (Together CLI):**
 
 ```shell
-# Worker node (Kubernetes) or Slurm compute node
-tg beta clusters ssh https://dex.<REGION>.cloud.together.ai/<CLUSTER_ID> \
-  --login <LOGIN> --host <NODE_HOSTNAME>
+# Worker / compute node
+tg clusters ssh https://dex.<LOCATION>.cloud.together.ai/t-<CLUSTER_ID> \
+  --login <LOGIN> --host <HOST>
 
 # Slurm login node (host defaults to the head node)
-tg beta clusters ssh https://dex.<REGION>.cloud.together.ai/<CLUSTER_ID> --login <LOGIN>
+tg clusters ssh https://dex.<LOCATION>.cloud.together.ai/t-<CLUSTER_ID> --login <LOGIN>
 ```
 
 If the CLI was previously installed with `pip`, migrate to the `uv`-managed install before using OIDC SSH: `pip uninstall together` and reinstall with `uv tool install "together[cli]"`.
 
 **Slurm hostnames:**
 
-- Compute nodes: `<NODE_NAME>.slurm-compute.slurm` (e.g., `gpu-dp-hmqnh-nwlnj.slurm-compute.slurm`)
+- Compute nodes: `<NODE_NAME>.slurm-compute.slurm` (on Slinky v1.0: `<WORKER_HOSTNAME>.slurm-workers-slurm.slurm`)
 - Login node: always `slurm-login`
+- SSH is disabled while the cluster has 0 GPUs
 
 ### Slurm Commands
 
@@ -259,6 +261,11 @@ Use reserved for baseline + on-demand for bursts.
 1. **Local NVMe** -- High-speed local I/O per node
 2. **Shared /home** -- NFS-mounted across nodes (code, configs, logs)
 3. **Shared Volumes** -- Multi-NIC, high-throughput persistent storage
+
+A volume created alone defaults to your default project; pass `project_id` to assign another.
+A volume created with a cluster belongs to the cluster's project (`shared_volume.project_id` is
+ignored). On Slurm, `/home` is persistent on the shared volume (`/data/home`); on Kubernetes,
+`/home` is ephemeral node-local storage — use a PVC for data you need to keep.
 
 ### Kubernetes PVCs
 
@@ -429,16 +436,31 @@ Detection coverage is expanding, and automated recommendations are enabled per c
 **Training Performance (preview):**
 - TorchTitan Training: short [TorchTitan](https://github.com/pytorch/torchtitan) benchmark on one or more nodes, measuring steady-state median model FLOPs utilization (MFU) after skipping warmup. Catches grossly degraded nodes that still pass point-in-time diagnostics. **B200 only** (Blackwell, `sm_100`) -- the built-in CUDA and PyTorch stack (PyTorch with FlashAttention 4) does not run on other GPU types. Runtime is about 15 minutes (roughly 9 minutes init, 6 minutes run). Runs on demand and is not part of automatic acceptance testing; thresholds may change while in preview. Default pass threshold: steady-state median MFU >= 30% for Llama 3 8B on a single B200 node (reference ~36.5%). Larger models and multi-node runs use per-run reference values (for example, Llama 3 70B reaches ~38% MFU on 4 nodes).
 
-### Node Repair
+### Node Repair and Remediations
 
-Auto repair uses three repair actions, ordered lightest to heaviest, plus a warning-only tier. If a lighter action does not clear the issue, it escalates. Every recommendation is reviewed and accepted by the user before a repair runs; training jobs must checkpoint first.
+Auto repair uses three actions (lightest to heaviest). The cluster's confirmation policy
+(Repairs tab → Auto-remediation policy) decides whether a recommendation waits for approval
+or runs on its own. Checkpoint training jobs before approving an interrupting repair.
 
-- **Reboot**: Restart the node in place. Fastest recovery; used for recoverable software or transient GPU faults.
-- **Quick Reprovision**: VM recreated on a random physical node (for software issues that persist across reboot).
-- **Migrate to New Host**: New VM on different physical hardware (for hardware failures).
-- **Warning**: Surface an alert for review with no automated repair action.
+- **Reboot** (`REBOOT_VM`): Restart the node in place.
+- **Quick Reprovision** (`VM_ONLY`): Delete the VM and provision a new one (may stay on the same host).
+- **Migrate to New Host** (`HOST_AWARE`): Cordon the host and reprovision on a different host.
+- **Remove** (`EVICT_WITHOUT_REPLACEMENT`): Evict without replacement; lowers GPU count.
+- **Cycle** (`HOST_POWER_CYCLE`): Power-cycle the bare-metal host while preserving identity.
+  Manual only; hardware/account gated (otherwise `403`). Auto repair never chooses Cycle.
+- **Warning**: Alert only; no automated repair.
 
-Repair lifecycle: Cordon -> Drain -> Reboot/Reprovision/Migrate -> Rejoin
+Repair lifecycle: Cordon → Drain → action → Rejoin. Under Auto-contain (not generally
+available), remediations can pass through `QUARANTINING` / `QUARANTINED` before execution.
+
+Drive remediations from the CLI:
+
+```shell
+tg clusters remediations list <CLUSTER_ID>
+tg clusters remediations approve <REMEDIATION_ID> [--mode VM_ONLY]
+tg clusters remediations create <CLUSTER_ID> <INSTANCE_ID> \
+  --mode HOST_POWER_CYCLE --reason "manual cycle"
+```
 
 **Signal to recommended action:**
 
@@ -522,9 +544,13 @@ Users require active Together AI accounts before they can be added.
 
 ### Compute
 
-- **Reserved**: Upfront payment, 1-90 days, discounted. Non-refundable, non-cancellable.
+- **Reserved**: Credits charged upfront for 3 to 180 days at discounted rates. Non-refundable.
 - **On-demand**: Hourly billing, no commitment. Can terminate anytime.
-- **Hybrid**: Reserved for baseline + on-demand for burst.
+- **Scheduled capacity** (`SCHEDULED_CAPACITY`): Credits cover a date window drawn from a
+  project capacity pool. Console shows the option only when the project has a pool. Hybrid
+  start-now clusters can combine pool GPUs with prepaid reserved GPUs outside the pool
+  (`num_capacity_pool_gpus` + `num_reserved_gpus`).
+- **Hybrid (reserved + on-demand)**: Reserved baseline with on-demand burst.
 
 ### Storage
 

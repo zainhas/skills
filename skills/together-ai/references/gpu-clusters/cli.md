@@ -4,55 +4,43 @@
 - [Installation](#installation)
 - [Authentication](#authentication)
 - [Cluster Commands](#cluster-commands)
+- [Remediations](#remediations)
+- [SSH](#ssh)
 - [Storage Commands](#storage-commands)
 - [Instance Types](#instance-types)
 - [Driver Versions](#driver-versions)
 
 
-The Together CLI (`tg`) is the supported command-line interface for managing GPU clusters. It ships with the Together Python SDK and replaces the legacy standalone `tcloud` binary.
-
-`together` is also installed as an alias of `tg`. Examples in this reference use the `tg` form to match the official docs.
+The Together CLI (`tg`) manages GPU clusters, remediations, and storage. It ships with the
+Together Python SDK. Use `tg clusters ...` on CLI 2.40+. CLI 3.0 removed `tg beta clusters`.
+`together` is an alias of `tg`.
 
 ## Installation
-
-Install the CLI as a `uv` tool. The `[cli]` extra pulls in CLI-only dependencies without bloating the Python SDK:
 
 ```shell
 uv tool install "together[cli]"
 tg --help
 ```
 
-Upgrade with:
-
-```shell
-uv tool upgrade "together[cli]"
-```
-
-For CI/CD, invoke the CLI directly with `uvx` to avoid a separate install step:
-
-```shell
-uvx "together[cli]" beta clusters list
-```
+Upgrade with `uv tool upgrade "together[cli]"`. For CI, prefer `uvx "together[cli]" clusters list`.
 
 ## Authentication
-
-The CLI authenticates via the `TOGETHER_API_KEY` environment variable. Get a key from [account settings](https://api.together.ai/settings/projects/~first/api-keys):
 
 ```shell
 export TOGETHER_API_KEY=<your_key>
 ```
 
-You can also pass `--api-key` per command, but the environment variable is preferred in CI so the token does not appear in process lists or logs. If both are provided, `--api-key` takes precedence.
+`--api-key` overrides the environment variable. Scripts should use the env var so the token does
+not appear in process lists. From CLI 2.41, interactive `tg login` is available for humans.
 
 ## Global Flags
 
-Available on every command:
-
 | Flag | Description |
 |------|-------------|
-| `--json` | Return the response as JSON. Useful for scripting. |
-| `--non-interactive` | Disable interactive prompts. Required in CI/CD. |
+| `--json` | Return JSON. Also suppresses interactive prompts. |
+| `--non-interactive` | Disable prompts. Required in CI/CD. |
 | `--api-key [string]` | Together API key. Falls back to `TOGETHER_API_KEY`. |
+| `--project [string]` | Project ID (also `TOGETHER_PROJECT_ID`). Needed for preemptible GPUs. |
 | `--timeout [number]` | Request timeout, in seconds. |
 | `--max-retries [number]` | Maximum number of HTTP retries. |
 | `--debug` | Enable debug logging. |
@@ -62,34 +50,43 @@ Available on every command:
 
 ### `clusters create`
 
-Create a new GPU cluster. Run with no flags to launch an interactive prompt that walks through the required fields.
-
 ```shell
-tg beta clusters create [OPTIONS]
+tg clusters create [OPTIONS]
 ```
 
-**Options:**
+Run with no flags for an interactive prompt. Pass `--non-interactive` or `--json` to skip prompts
+(also automatic when no TTY is attached).
+
+**Core options:**
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--name` | string | Name of the cluster |
-| `--num-gpus` | number | Number of GPUs (must be a multiple of 8) |
-| `--gpu-type` | enum | `H100_SXM`, `H200_SXM`, `B200_SXM`, `H100_SXM_INF`, `L40_PCIE`, `RTX_6000_PCI` |
-| `--region` | string | Region (use `clusters list-regions` to find valid regions) |
-| `--billing-type` | enum | `ON_DEMAND` or `RESERVED` |
-| `--duration-days` | number | Reservation length in days (only with `RESERVED` billing) |
-| `--nvidia-driver-version` | string | NVIDIA driver version (use `clusters list-regions` for options) |
-| `--cuda-version` | string | CUDA version (use `clusters list-regions` for options) |
+| `--name` | string | Cluster name |
+| `--num-gpus` | number | GPU count (multiple of 8) |
+| `--gpu-type` | enum | `H100_SXM`, `H200_SXM`, `B200_SXM`, `B300_SXM`, `H100_SXM_INF`, `L40_PCIE`, `RTX_6000_PCI` |
+| `--region` | string | Region (`clusters list-regions`) |
+| `--billing-type` | enum | `ON_DEMAND`, `RESERVED`, or `SCHEDULED_CAPACITY` |
+| `--duration-days` | number | Reservation length (only with `RESERVED`) |
+| `--nvidia-driver-version` | string | NVIDIA driver (pair with `--cuda-version`) |
+| `--cuda-version` | string | CUDA version |
+| `--os` | string | OS image for the pair (default `ubuntu-22.04`) |
+| `--nvidia-version-id` | string | Catalog `id` from `list-regions`; replaces the three version flags |
 | `--cluster-type` | enum | `KUBERNETES` or `SLURM` |
-| `--volume` | string | Existing storage volume ID to attach |
-| `--non-interactive` | -- | Skip interactive prompts. Required in CI. |
-| `--json` | -- | Output in JSON format |
+| `--volume` | string | Existing volume ID (required in non-interactive mode when attaching storage) |
+| `--capacity-pool-id` | string | Capacity pool for `SCHEDULED_CAPACITY` |
+| `--num-capacity-pool-gpus` | number | GPUs drawn from the pool (multiple of 8) |
+| `--num-reserved-gpus` | number | Prepaid reserved GPUs (hybrid scheduled / reserved) |
+| `--reservation-start-time` | string | Scheduled window start (RFC 3339); omit to start now |
+| `--reservation-end-time` | string | Scheduled window end (RFC 3339) |
+| `--num-preemptible-gpus` | number | Preemptible GPUs (multiple of 8; needs a project) |
+| `--non-interactive` | -- | Skip prompts |
+| `--json` | -- | JSON output |
 
-**Examples:**
+Non-interactive driver selection: either `--nvidia-version-id` alone, or
+`--nvidia-driver-version` + `--cuda-version` (optionally `--os`).
 
 ```shell
-# On-demand Kubernetes cluster with H100s
-tg beta clusters create \
+tg clusters create \
   --name my-training-cluster \
   --num-gpus 8 \
   --gpu-type H100_SXM \
@@ -99,188 +96,92 @@ tg beta clusters create \
   --billing-type ON_DEMAND \
   --cluster-type KUBERNETES \
   --non-interactive
-
-# Reserved Slurm cluster with H200s and attached storage
-tg beta clusters create \
-  --name my-slurm-cluster \
-  --num-gpus 16 \
-  --gpu-type H200_SXM \
-  --region us-central-8 \
-  --cuda-version 12.6 \
-  --nvidia-driver-version 560 \
-  --billing-type RESERVED \
-  --duration-days 30 \
-  --cluster-type SLURM \
-  --volume <VOLUME_ID> \
-  --non-interactive
 ```
 
-### `clusters list`
-
-List all GPU clusters.
+### `clusters list` / `retrieve` / `update`
 
 ```shell
-tg beta clusters list
+tg clusters list
+tg clusters retrieve [CLUSTER_ID]
+tg clusters update [CLUSTER_ID] --num-gpus 16
 ```
 
-### `clusters retrieve`
-
-Get details for a specific cluster.
-
-```shell
-tg beta clusters retrieve [CLUSTER_ID]
-```
-
-### `clusters update`
-
-Update the configuration of an existing cluster (scale GPU count or change cluster type).
-
-```shell
-tg beta clusters update [CLUSTER_ID] [OPTIONS]
-```
-
-**Options:**
-
-| Flag | Type | Description |
-|------|------|-------------|
-| `--num-gpus` | number | New GPU count (must be a multiple of 8) |
-| `--cluster-type` | enum | `KUBERNETES` or `SLURM` |
-| `--json` | -- | Output in JSON format |
-
-**Example:**
-
-```shell
-# Scale up to 16 GPUs
-tg beta clusters update [CLUSTER_ID] --num-gpus 16
-
-# Switch to Slurm
-tg beta clusters update [CLUSTER_ID] --cluster-type SLURM
-```
+`list` pages 20 clusters in text mode; use `--after <CLUSTER_ID>` for the next page. `--json`
+returns every cluster. Update can also raise `--num-reserved-gpus` / `--num-capacity-pool-gpus`
+and extend `--reservation-end-time` where enabled. `--cluster-type` on update is accepted but
+ignored by the API.
 
 ### `clusters delete`
 
-Delete a GPU cluster.
-
 ```shell
-tg beta clusters delete [CLUSTER_ID]
+tg clusters delete [CLUSTER_ID]
 ```
+
+Interactive sessions confirm before deleting. Pass `--force`, or global `--non-interactive` /
+`--json`, to skip the prompt.
 
 ### `clusters list-regions`
 
-List available regions, supported GPU types, and driver versions.
-
 ```shell
-tg beta clusters list-regions
+tg clusters list-regions
 ```
 
-**Example output:**
-
-```json
-{
-  "regions": [
-    {
-      "driver_versions": [
-        {"cuda_version": "12.9", "nvidia_driver_version": "575"},
-        {"cuda_version": "12.8", "nvidia_driver_version": "570"},
-        {"cuda_version": "12.6", "nvidia_driver_version": "560"}
-      ],
-      "name": "us-central-8",
-      "supported_instance_types": [
-        "H100_SXM",
-        "H200_SXM"
-      ]
-    }
-  ]
-}
-```
+Each `driver_versions[]` entry includes `id`, `cuda_version`, `nvidia_driver_version`, and `os`.
+Pass `id` to create as `--nvidia-version-id`.
 
 ### `clusters get-credentials`
 
-Download Kubernetes credentials (kubeconfig) for a cluster.
-
 ```shell
-tg beta clusters get-credentials [CLUSTER_ID] [OPTIONS]
+tg clusters get-credentials [CLUSTER_ID] --set-default-context --no-json
 ```
 
-**Options:**
+Only project admins can download the admin kubeconfig. Useful flags: `--file`, `--context-name`,
+`--overwrite-existing`, `--set-default-context`.
 
-| Flag | Type | Description |
-|------|------|-------------|
-| `--file` | path or `-` | Path to write kubeconfig. `-` prints to stdout. Default: `~/.kube/config` |
-| `--context-name` | string | Name for the kubeconfig context. Default: cluster name |
-| `--overwrite-existing` | -- | Overwrite existing kubeconfig entries on conflict |
-| `--set-default-context` | -- | Set the new context as default for kubectl |
-
-**Examples:**
+## Remediations
 
 ```shell
-# Merge into ~/.kube/config and switch the default context
-tg beta clusters get-credentials [CLUSTER_ID] --set-default-context
+tg clusters remediations create [CLUSTER_ID] [INSTANCE_ID] \
+  --mode HOST_POWER_CYCLE --reason "manual cycle"
 
-# Write to a specific file
-tg beta clusters get-credentials [CLUSTER_ID] --file ./kubeconfig.yaml
+tg clusters remediations list [CLUSTER_ID] [INSTANCE_ID]
+tg clusters remediations retrieve [REMEDIATION_ID]
+tg clusters remediations approve [REMEDIATION_ID] [--mode VM_ONLY]
+tg clusters remediations reject [REMEDIATION_ID] --reason "not needed"
+tg clusters remediations cancel [REMEDIATION_ID]
+```
 
-# Print to stdout
-tg beta clusters get-credentials [CLUSTER_ID] --file -
+Modes: `VM_ONLY` (quick reprovision), `HOST_AWARE` (migrate), `EVICT_WITHOUT_REPLACEMENT`,
+`REBOOT_VM`, `HOST_POWER_CYCLE` (Cycle; hardware/account gated, else `403`).
+List filters: `--mode`, `--state` (`PENDING_APPROVAL`, `PENDING`, `RUNNING`, `SUCCEEDED`,
+`FAILED`, `CANCELLED`, `AUTO_RESOLVED`, `QUARANTINING`, `QUARANTINED`), `--trigger`.
+Omit `INSTANCE_ID` (or use `-` in the API) to list the whole cluster.
 
-# Use the cluster
-kubectl get nodes
+## SSH
+
+```shell
+tg clusters ssh https://dex.<LOCATION>.cloud.together.ai/t-<CLUSTER_ID> \
+  --login <LOGIN> [--host <HOST>]
+```
+
+OIDC SSH needs CLI 2.40+ and Python 3.10+. `<LOCATION>` is the datacenter segment of node
+hostnames (for example `s2.ca-west-1b`), not the region name. Key-based jump host form:
+
+```shell
+ssh -J <LOGIN>@ssh.t-<CLUSTER_ID>.<LOCATION>.cloud.together.ai <LOGIN>@<HOST>
 ```
 
 ## Storage Commands
 
-Shared storage volumes are persistent, resizable, high-throughput storage backed by multi-NIC
-bare metal paths. Volumes persist independently of cluster lifecycle.
-
-### `clusters storage create`
-
-Create a new shared storage volume.
-
 ```shell
-tg beta clusters storage create [OPTIONS]
+tg clusters storage create --volume-name my-data --size-tib 2 --region us-central-8
+tg clusters storage list
+tg clusters storage retrieve [VOLUME_ID]
+tg clusters storage delete [VOLUME_ID] --force
 ```
 
-**Options:**
-
-| Flag | Type | Description |
-|------|------|-------------|
-| `--volume-name` | string | Name of the storage volume (required) |
-| `--size-tib` | number | Size in tebibytes (required) |
-| `--region` | string | Region to create the volume in (required) |
-| `--json` | -- | Output in JSON format |
-
-**Example:**
-
-```shell
-tg beta clusters storage create \
-  --volume-name my-training-data \
-  --size-tib 2 \
-  --region us-central-8
-```
-
-### `clusters storage list`
-
-List all shared storage volumes.
-
-```shell
-tg beta clusters storage list
-```
-
-### `clusters storage retrieve`
-
-Get details for a specific volume.
-
-```shell
-tg beta clusters storage retrieve [VOLUME_ID]
-```
-
-### `clusters storage delete`
-
-Delete a shared storage volume. The volume must not be attached to any cluster.
-
-```shell
-tg beta clusters storage delete [VOLUME_ID]
-```
+Delete confirms interactively unless `--force`, `--non-interactive`, or `--json` is set. The
+volume must not be attached to any cluster.
 
 ## Instance Types
 
@@ -290,16 +191,11 @@ tg beta clusters storage delete [VOLUME_ID]
 | `H100_SXM_INF` | NVIDIA H100 | 80GB | Inference-optimized, lower IB bandwidth |
 | `H200_SXM` | NVIDIA H200 | 141GB | InfiniBand networking |
 | `B200_SXM` | NVIDIA B200 | 192GB | InfiniBand networking |
+| `B300_SXM` | NVIDIA B300 | — | Availability varies by region |
 | `L40_PCIE` | NVIDIA L40 | 48GB | PCIe |
 | `RTX_6000_PCI` | NVIDIA RTX 6000 | 24GB | PCIe |
 
 ## Driver Versions
 
-Available CUDA driver versions (check `clusters list-regions` for per-region availability):
-
-- `CUDA_12_4_550`
-- `CUDA_12_5_555`
-- `CUDA_12_6_560`
-- `CUDA_12_6_565`
-- `CUDA_12_8_570`
-- `CUDA_12_9_575`
+Prefer the live `list-regions` pairs (and their catalog `id`). Combined `driver_version` strings
+still follow `CUDA_{major}_{minor}_{nvidia}` (for example `CUDA_12_6_560`).

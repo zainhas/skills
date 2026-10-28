@@ -21,13 +21,21 @@ from together import Together
 client = Together()
 
 
-def create_volume(name: str, size_tib: int, region: str):
-    """Create a new shared storage volume."""
-    volume = client.beta.clusters.storage.create(
-        volume_name=name,
-        size_tib=size_tib,
-        region=region,
-    )
+def create_volume(name: str, size_tib: int, region: str, project_id: str | None = None):
+    """Create a new shared storage volume.
+
+    Defaults to the caller's default project. Pass ``project_id`` to assign another
+    project you can access. Volumes created inline with a cluster follow the cluster's
+    project instead.
+    """
+    kwargs: dict = {
+        "volume_name": name,
+        "size_tib": size_tib,
+        "region": region,
+    }
+    if project_id:
+        kwargs["project_id"] = project_id
+    volume = client.beta.clusters.storage.create(**kwargs)
     print(f"Created volume: {volume.volume_id} ({volume.volume_name}, {volume.size_tib} TiB, {volume.status})")
     return volume
 
@@ -76,6 +84,7 @@ def parse_args() -> argparse.Namespace:
     create_parser.add_argument("--name", required=True, help="Volume name")
     create_parser.add_argument("--size-tib", required=True, type=int, help="Volume size in TiB")
     create_parser.add_argument("--region", required=True, help="Region name")
+    create_parser.add_argument("--project-id", help="Optional project that owns the volume")
 
     retrieve_parser = subparsers.add_parser("get", help="Retrieve a volume")
     retrieve_parser.add_argument("--volume-id", required=True, help="Volume id")
@@ -102,7 +111,7 @@ def main() -> None:
         list_volumes()
         return
     if args.command == "create":
-        create_volume(args.name, args.size_tib, args.region)
+        create_volume(args.name, args.size_tib, args.region, project_id=args.project_id)
         return
     if args.command == "get":
         retrieve_volume(args.volume_id)
@@ -114,7 +123,7 @@ def main() -> None:
         delete_volume(args.volume_id)
         return
 
-    volume = create_volume(args.name, args.size_tib, args.region)
+    volume = create_volume(args.name, args.size_tib, args.region, project_id=args.project_id)
     print("\nAll volumes:")
     list_volumes()
     print("\nVolume details:")

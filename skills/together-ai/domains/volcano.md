@@ -11,7 +11,8 @@ Hand-offs: creating the cluster and getting `kubectl` credentials is `domains/gp
 
 ## Setup delta
 
-- A Together Kubernetes GPU cluster in the `Ready` state, with `kubectl` pointed at it (`tg beta clusters get-credentials <cluster_id> --set-default-context`).
+- A Together Kubernetes GPU cluster in the `Ready` state. Only project admins can download the admin kubeconfig.
+- Point `kubectl` at it with `tg clusters get-credentials <CLUSTER_ID> --set-default-context --no-json` (or `tg beta clusters` on CLI before 3.0).
 - GPU nodes expose `nvidia.com/gpu`; the NVIDIA device plugin is preinstalled on Together clusters. Confirm with:
 
 ```bash
@@ -29,7 +30,7 @@ kubectl apply -f https://raw.githubusercontent.com/volcano-sh/volcano/v1.15.0/in
 kubectl -n volcano-system wait --for=condition=Available deployment --all --timeout=180s
 ```
 
-A `default` queue is created automatically (`kubectl get queue`). Helm is an alternative: `helm repo add volcano-sh https://volcano-sh.github.io/helm-charts && helm install volcano volcano-sh/volcano -n volcano-system --create-namespace`.
+A `default` queue is created automatically (`kubectl get queue`). Helm is an alternative: `helm repo add volcano-sh https://volcano-sh.github.io/helm-charts && helm install volcano volcano-sh/volcano --version 1.15.0 -n volcano-system --create-namespace`.
 
 ### Create a queue
 
@@ -58,8 +59,7 @@ metadata:
   name: shared-pvc
 spec:
   accessModes: ["ReadWriteMany"]
-  storageClassName: shared-wekafs   # Together default shared storage class
-  volumeName: <shared-volume-name>  # the static PV named after your shared volume
+  volumeName: <shared-volume-name>  # static PV named after your shared volume
   resources:
     requests:
       storage: 100Gi
@@ -114,7 +114,7 @@ spec:
 - Always pin the Volcano version in the install URL.
 - `schedulerName: volcano` must be on the pod template (on a `vcjob` it goes under `spec`). Without it, the default scheduler grabs the pods and there is no gang guarantee.
 - A job whose total request exceeds the queue's `capability` is rejected. Raise the cap or split the job.
-- To gang-schedule non-vcjob workloads (for example MPIJobs from the preinstalled MPI Operator), set `schedulerName: volcano` and attach a `PodGroup`. See https://volcano.sh/en/docs/podgroup/.
+- To gang-schedule non-vcjob workloads (for example MPIJobs), set `schedulerName: volcano` and attach a `PodGroup`. The MPI Operator is not on every cluster: check with `kubectl get crd mpijobs.kubeflow.org` and install it if missing. See https://volcano.sh/en/docs/podgroup/.
 - Volcano and Kueue can coexist on one cluster: Volcano owns pods with `schedulerName: volcano`; Kueue admits jobs on the default scheduler. Pick one per workload; do not point a single job at both.
 
 ## Docs

@@ -11,7 +11,8 @@ Hand-offs: creating the cluster and getting `kubectl` credentials is `domains/gp
 
 ## Setup delta
 
-- A Together Kubernetes GPU cluster in the `Ready` state, with `kubectl` pointed at it (`tg beta clusters get-credentials <cluster_id> --set-default-context`).
+- A Together Kubernetes GPU cluster in the `Ready` state. Only project admins can download the admin kubeconfig.
+- Point `kubectl` at it with `tg clusters get-credentials <CLUSTER_ID> --set-default-context --no-json` (or `tg beta clusters` on CLI before 3.0).
 - GPU nodes expose `nvidia.com/gpu` (NVIDIA device plugin preinstalled on Together clusters).
 
 ## Cookbook
@@ -75,8 +76,7 @@ metadata:
   name: shared-pvc
 spec:
   accessModes: ["ReadWriteMany"]
-  storageClassName: shared-wekafs   # Together default shared storage class
-  volumeName: <shared-volume-name>  # the static PV named after your shared volume
+  volumeName: <shared-volume-name>  # static PV named after your shared volume
   resources:
     requests:
       storage: 100Gi
@@ -137,7 +137,7 @@ kubectl get "$WORKLOAD" -o jsonpath='{.status.conditions[?(@.type=="QuotaReserve
 - Pin the version, and use API `kueue.x-k8s.io/v1beta2` for v0.18.x.
 - The ClusterQueue's `coveredResources` MUST include every resource a job requests. A GPU job that also requests CPU and memory is never admitted if the ClusterQueue only covers `nvidia.com/gpu`. This is the most common failure.
 - `flavors[].name` must exactly match a `ResourceFlavor` name, or the ClusterQueue admits nothing.
-- The `kueue.x-k8s.io/queue-name` label must name a `LocalQueue` in the job's own namespace. A missing or wrong label means the job runs immediately, bypassing quota.
+- The `kueue.x-k8s.io/queue-name` label must name a `LocalQueue` in the job's own namespace. A missing label means Kueue ignores the job: it stays suspended with no Workload. A wrong LocalQueue name yields a Workload that never admits.
 - Volcano and Kueue can coexist: Kueue gates jobs on the default scheduler; Volcano owns pods with `schedulerName: volcano`. Do not point one job at both.
 
 ## Docs

@@ -33,6 +33,13 @@ Base URL: `https://api.together.xyz/v1`
 | `PUT /compute/clusters/{id}` | Update cluster | Scale or change cluster type |
 | `DELETE /compute/clusters/{id}` | Delete cluster | Remove a cluster |
 | `GET /compute/regions` | List regions | Available regions, GPUs, drivers |
+| `GET/POST /compute/clusters/{id}/instances/{iid}/remediations` | Remediations | List/create node remediations (`iid` may be `-` to list the cluster) |
+| `GET /compute/clusters/remediations/{id}` | Get remediation | Retrieve one remediation |
+| `POST .../remediations/{id}/approve|reject|cancel` | Remediation actions | Approve (optional mode override), reject, or cancel |
+
+Remediation modes: `VM_ONLY`, `HOST_AWARE`, `EVICT_WITHOUT_REPLACEMENT`, `REBOOT_VM`,
+`HOST_POWER_CYCLE`. States include `PENDING_APPROVAL`, `QUARANTINING`, `QUARANTINED`, and the
+usual pending/running/terminal set. `HOST_POWER_CYCLE` returns `403` when not enabled.
 
 ## Storage Endpoints
 
@@ -46,27 +53,24 @@ Base URL: `https://api.together.xyz/v1`
 
 ## Create Cluster
 
-The API requires `cuda_version` and `nvidia_driver_version` as separate fields. The SDK
-also accepts a combined `driver_version` string, but the two split fields must be present
-for the request to succeed. Pass them via `extra_body` in the SDK or directly in REST.
+Pass `cuda_version` and `nvidia_driver_version` (optionally `os`; default `ubuntu-22.04`).
+Current SDKs accept them as first-class fields on `client.clusters.create`. Older Python
+clients may still need `extra_body`. A combined `driver_version` string is optional.
 
 ```python
 from together import Together
 client = Together()
 
-cluster = client.beta.clusters.create(
+cluster = client.clusters.create(
     cluster_name="my-gpu-cluster",
     region="us-central-8",
     gpu_type="H100_SXM",
     num_gpus=8,
-    driver_version="CUDA_12_6_560",
+    cuda_version="12.6",
+    nvidia_driver_version="560",
     billing_type="ON_DEMAND",
     cluster_type="KUBERNETES",
     # volume_id="existing-volume-id",  # optional: attach existing volume
-    extra_body={
-        "cuda_version": "12.6",
-        "nvidia_driver_version": "560",
-    },
 )
 print(cluster.cluster_id)
 ```
@@ -75,17 +79,15 @@ print(cluster.cluster_id)
 import Together from "together-ai";
 const client = new Together();
 
-const cluster = await client.beta.clusters.create({
+const cluster = await client.clusters.create({
   cluster_name: "my-gpu-cluster",
   region: "us-central-8",
   gpu_type: "H100_SXM",
   num_gpus: 8,
-  driver_version: "CUDA_12_6_560",
-  billing_type: "ON_DEMAND",
-  cluster_type: "KUBERNETES",
-  // @ts-expect-error -- required by API but not yet in SDK types
   cuda_version: "12.6",
   nvidia_driver_version: "560",
+  billing_type: "ON_DEMAND",
+  cluster_type: "KUBERNETES",
 });
 console.log(cluster.cluster_id);
 ```
@@ -109,14 +111,16 @@ curl -X POST \
 ```
 
 ```shell
-together beta clusters create \
+tg clusters create \
   --name my-gpu-cluster \
   --num-gpus 8 \
   --gpu-type H100_SXM \
   --region us-central-8 \
-  --driver-version CUDA_12_6_560 \
+  --cuda-version 12.6 \
+  --nvidia-driver-version 560 \
   --billing-type ON_DEMAND \
-  --cluster-type KUBERNETES
+  --cluster-type KUBERNETES \
+  --non-interactive
 ```
 
 ### Create Request Body
@@ -124,28 +128,34 @@ together beta clusters create \
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `cluster_name` | string | Yes | Name of the cluster |
-| `region` | string | Yes | Region (use `list_regions()` in Python or `listRegions()` in TypeScript to find valid regions) |
+| `region` | string | Yes | Region (use `list_regions()` / `listRegions()`) |
 | `gpu_type` | string | Yes | GPU type (see Instance Types below) |
 | `num_gpus` | integer | Yes | Number of GPUs (must be a multiple of 8) |
-| `driver_version` | string | Yes | Combined driver string, e.g. `CUDA_12_6_560` (see Driver Versions below) |
-| `cuda_version` | string | Yes | CUDA version, e.g. `"12.6"` |
-| `nvidia_driver_version` | string | Yes | NVIDIA driver version, e.g. `"560"` |
-| `billing_type` | string | Yes | `ON_DEMAND` or `RESERVED` |
+| `cuda_version` | string | Yes* | CUDA version, e.g. `"12.6"` (*or pass nvidia version catalog `id`) |
+| `nvidia_driver_version` | string | Yes* | NVIDIA driver version, e.g. `"560"` |
+| `os` | string | No | OS image for the pair; default `ubuntu-22.04` |
+| `driver_version` | string | No | Combined string, e.g. `CUDA_12_6_560` (optional alongside split fields) |
+| `billing_type` | string | Yes | `ON_DEMAND`, `RESERVED`, or `SCHEDULED_CAPACITY` |
 | `cluster_type` | string | No | `KUBERNETES` (default) or `SLURM` |
-| `duration_days` | integer | No | Reservation length in days (only with `RESERVED`) |
+| `duration_days` | integer | No | Reservation length in days (only with `RESERVED`; 3–180) |
+| `capacity_pool_id` | string | No | Capacity pool for `SCHEDULED_CAPACITY` |
+| `num_capacity_pool_gpus` | integer | No | GPUs from the pool (multiple of 8) |
+| `num_reserved_gpus` | integer | No | Prepaid reserved GPUs (hybrid scheduled / reserved) |
+| `reservation_start_time` | string | No | Scheduled window start (RFC 3339); omit to start now |
+| `reservation_end_time` | string | No | Scheduled window end (RFC 3339) |
 | `volume_id` | string | No | Existing shared volume ID to attach |
-| `shared_volume` | object | No | Inline volume: `{volume_name, size_tib, region}` |
+| `shared_volume` | object | No | Inline volume: `{volume_name, size_tib, region}` (project follows the cluster) |
 
 ## List Clusters
 
 ```python
-response = client.beta.clusters.list()
+response = client.clusters.list()
 for c in response.clusters:
     print(f"{c.cluster_id}: {c.cluster_name} ({c.status}, {c.num_gpus} GPUs)")
 ```
 
 ```typescript
-const response = await client.beta.clusters.list();
+const response = await client.clusters.list();
 for (const c of response.clusters) {
   console.log(`${c.cluster_id}: ${c.cluster_name} (${c.status})`);
 }
@@ -158,18 +168,18 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters list
+tg clusters list
 ```
 
 ## Get Cluster
 
 ```python
-cluster = client.beta.clusters.retrieve("cluster-id")
+cluster = client.clusters.retrieve("cluster-id")
 print(f"Status: {cluster.status}, GPUs: {cluster.num_gpus}")
 ```
 
 ```typescript
-const cluster = await client.beta.clusters.retrieve("cluster-id");
+const cluster = await client.clusters.retrieve("cluster-id");
 console.log(cluster);
 ```
 
@@ -180,13 +190,13 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters retrieve <CLUSTER_ID>
+tg clusters retrieve <CLUSTER_ID>
 ```
 
 ## Update / Scale Cluster
 
 ```python
-cluster = client.beta.clusters.update(
+cluster = client.clusters.update(
     "cluster-id",
     num_gpus=16,
     cluster_type="KUBERNETES",
@@ -194,7 +204,7 @@ cluster = client.beta.clusters.update(
 ```
 
 ```typescript
-const cluster = await client.beta.clusters.update("cluster-id", {
+const cluster = await client.clusters.update("cluster-id", {
   num_gpus: 16,
   cluster_type: "KUBERNETES",
 });
@@ -209,8 +219,8 @@ curl -X PUT \
 ```
 
 ```shell
-together beta clusters update <CLUSTER_ID> --num-gpus 16
-together beta clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNETES
+tg clusters update <CLUSTER_ID> --num-gpus 16
+tg clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNETES
 ```
 
 ### Update Request Body
@@ -223,11 +233,11 @@ together beta clusters update <CLUSTER_ID> --num-gpus 16 --cluster-type KUBERNET
 ## Delete Cluster
 
 ```python
-client.beta.clusters.delete("cluster-id")
+client.clusters.delete("cluster-id")
 ```
 
 ```typescript
-await client.beta.clusters.delete("cluster-id");
+await client.clusters.delete("cluster-id");
 ```
 
 ```shell
@@ -237,19 +247,19 @@ curl -X DELETE \
 ```
 
 ```shell
-together beta clusters delete <CLUSTER_ID>
+tg clusters delete <CLUSTER_ID>
 ```
 
 ## List Regions
 
 ```python
-regions = client.beta.clusters.list_regions()
+regions = client.clusters.list_regions()
 for r in regions.regions:
     print(f"{r.name}: {r.supported_instance_types}, drivers: {r.driver_versions}")
 ```
 
 ```typescript
-const regions = await client.beta.clusters.listRegions();
+const regions = await client.clusters.listRegions();
 console.log(regions);
 ```
 
@@ -260,13 +270,13 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters list-regions
+tg clusters list-regions
 ```
 
 ## Create Shared Volume
 
 ```python
-volume = client.beta.clusters.storage.create(
+volume = client.clusters.storage.create(
     volume_name="my-shared-volume",
     size_tib=2,
     region="us-central-8",
@@ -275,7 +285,7 @@ print(volume.volume_id)
 ```
 
 ```typescript
-const volume = await client.beta.clusters.storage.create({
+const volume = await client.clusters.storage.create({
   volume_name: "my-shared-volume",
   size_tib: 2,
   region: "us-central-8",
@@ -292,7 +302,7 @@ curl -X POST \
 ```
 
 ```shell
-together beta clusters storage create \
+tg clusters storage create \
   --volume-name my-shared-volume \
   --size-tib 2 \
   --region us-central-8
@@ -305,17 +315,18 @@ together beta clusters storage create \
 | `volume_name` | string | Yes | Name of the volume |
 | `size_tib` | integer | Yes | Size in tebibytes (TiB) |
 | `region` | string | Yes | Region name |
+| `project_id` | string | No | Project that owns the volume; default is the caller's default project. Ignored when the volume is created inline with a cluster. |
 
 ## List Shared Volumes
 
 ```python
-volumes = client.beta.clusters.storage.list()
+volumes = client.clusters.storage.list()
 for v in volumes.volumes:
     print(f"{v.volume_id}: {v.volume_name} ({v.size_tib} TiB, {v.status})")
 ```
 
 ```typescript
-const volumes = await client.beta.clusters.storage.list();
+const volumes = await client.clusters.storage.list();
 console.log(volumes);
 ```
 
@@ -326,18 +337,18 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters storage list
+tg clusters storage list
 ```
 
 ## Get Shared Volume
 
 ```python
-volume = client.beta.clusters.storage.retrieve("volume-id")
+volume = client.clusters.storage.retrieve("volume-id")
 print(f"{volume.volume_name}: {volume.size_tib} TiB ({volume.status})")
 ```
 
 ```typescript
-const volume = await client.beta.clusters.storage.retrieve("volume-id");
+const volume = await client.clusters.storage.retrieve("volume-id");
 console.log(volume);
 ```
 
@@ -348,20 +359,20 @@ curl -X GET \
 ```
 
 ```shell
-together beta clusters storage retrieve <VOLUME_ID>
+tg clusters storage retrieve <VOLUME_ID>
 ```
 
 ## Update (Resize) Shared Volume
 
 ```python
-volume = client.beta.clusters.storage.update(
+volume = client.clusters.storage.update(
     volume_id="volume-id",
     size_tib=5,
 )
 ```
 
 ```typescript
-const volume = await client.beta.clusters.storage.update({
+const volume = await client.clusters.storage.update({
   volume_id: "volume-id",
   size_tib: 5,
 });
@@ -380,11 +391,11 @@ curl -X PUT \
 Volume must not be attached to any cluster.
 
 ```python
-client.beta.clusters.storage.delete("volume-id")
+client.clusters.storage.delete("volume-id")
 ```
 
 ```typescript
-await client.beta.clusters.storage.delete("volume-id");
+await client.clusters.storage.delete("volume-id");
 ```
 
 ```shell
@@ -394,7 +405,7 @@ curl -X DELETE \
 ```
 
 ```shell
-together beta clusters storage delete <VOLUME_ID>
+tg clusters storage delete <VOLUME_ID>
 ```
 
 ## Instance Types
@@ -405,6 +416,7 @@ together beta clusters storage delete <VOLUME_ID>
 | `H100_SXM_INF` | NVIDIA H100 | 80GB | Inference-optimized, lower IB bandwidth |
 | `H200_SXM` | NVIDIA H200 | 141GB | InfiniBand networking |
 | `B200_SXM` | NVIDIA B200 | 192GB | InfiniBand networking |
+| `B300_SXM` | NVIDIA B300 | — | Availability varies by region |
 | `L40_PCIE` | NVIDIA L40 | 48GB | PCIe |
 | `RTX_6000_PCI` | NVIDIA RTX 6000 | 24GB | PCIe |
 
