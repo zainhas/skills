@@ -30,7 +30,7 @@ print(resp.choices[0].message.content)
   in `SKILL.md`. `Qwen/Qwen3.6-Plus`, `Qwen3.7-Plus`, `Qwen3.7-Max`, and `Qwen3.8-Flash` return 403
   `third_party_data_sharing_blocked` unless the organization enables third-party data sharing.
 - Image input: put `{"type": "image_url", "image_url": {"url": ...}}` parts in the user message's
-  `content` list and use a vision model (`Qwen/Qwen3.5-9B`, `MiniMaxAI/MiniMax-M3`,
+  `content` list and use a vision model (`Qwen/Qwen3.5-9B`, `MiniMaxAI/MiniMax-M3.1-Flash`,
   `moonshotai/Kimi-K3`).
 
 ## Rules
@@ -54,7 +54,7 @@ print(resp.choices[0].message.content)
 - Prefer `json_schema` to looser JSON modes for machine-readable output. Streaming works with
   `response_format`: join the chunks, then parse the full string.
 - Reasoning: the trace arrives on `reasoning` (GPT-OSS, Qwen3.5 9B) or `reasoning_content` (Kimi K3, DeepSeek
-  V4 Pro 0813, GLM-5.2, MiniMax M3, as observed 2026-10-07). Read both, and when you send a prior
+  V4 Pro 0813, GLM-5.2, MiniMax M3.1 Flash, as observed 2026-10-29). Read both, and when you send a prior
   assistant turn back, return the trace unmodified under the key it came on. Thinking-by-default models spend
   `max_tokens` on the trace first, so give them headroom or the answer comes back empty. Turn
   thinking off with `reasoning={"enabled": False}` on hybrid models. Use reasoning models only

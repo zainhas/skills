@@ -13,7 +13,7 @@
 
 ## Full Model Table
 
-Serverless reasoning models as of 2026-10-07 (source:
+Serverless reasoning models as of 2026-10-29 (source:
 [Reasoning](https://docs.together.ai/docs/inference/chat/reasoning)). Kimi K3, GLM-5, DeepSeek-R1
 and its distillations, QwQ-32B, and DeepSeek V3.1 are now dedicated-only. The trace arrives on
 `reasoning` or `reasoning_content` depending on the model (Kimi K3 uses `reasoning_content`), so
@@ -24,7 +24,7 @@ read both.
 | Kimi K3 | `moonshotai/Kimi-K3` | Hybrid (on by default) | 1M | Yes |
 | DeepSeek V4 Pro 0813 | `deepseek-ai/DeepSeek-V4-Pro-0813` | Hybrid (on by default) | 1M | Yes |
 | GLM-5.2 | `zai-org/GLM-5.2` | Hybrid (on by default) | 512K | Yes |
-| MiniMax M3 | `MiniMaxAI/MiniMax-M3` | Hybrid (on by default) | 512K | Yes |
+| MiniMax M3.1 Flash | `MiniMaxAI/MiniMax-M3.1-Flash` | Hybrid (on by default) | 1M | Yes |
 | Qwen3.6 Plus | `Qwen/Qwen3.6-Plus` | Hybrid (on by default) | 1M | No |
 | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | Hybrid (on by default) | 262K | Yes |
 | GPT-OSS 120B | `openai/gpt-oss-120b` | Adjustable effort | 128K | Yes |
@@ -249,9 +249,9 @@ response = client.chat.completions.create(
 ### Separate reasoning field (most models)
 
 Most reasoning models return the chain of thought in a dedicated field on the response message or
-streaming delta, but the field name depends on the model. Observed 2026-10-07: GPT-OSS and
-Qwen3.5 9B use `reasoning`; Kimi K3, DeepSeek V4 Pro 0813, GLM-5.2, and MiniMax M3 use
-`reasoning_content`. Read both.
+streaming delta, but the field name depends on the model. Observed 2026-10-29: GPT-OSS and
+Qwen3.5 9B use `reasoning`; Kimi K3, DeepSeek V4 Pro 0813, GLM-5.2, and MiniMax M3.1 Flash use
+`reasoning_content`. MiniMax M3.1 Flash may emit either field when streaming, so read both.
 
 Use the same key for input and output: when you send a prior assistant turn back for preserved
 thinking or multi-turn tool calling, return the trace unmodified under the key it arrived on
