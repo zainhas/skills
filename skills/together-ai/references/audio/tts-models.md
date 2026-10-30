@@ -18,6 +18,7 @@ These models are current in the latest text-to-speech guide and are not listed i
 |-------|-----------|--------|-----------|-----------------|
 | Orpheus 3B | `canopylabs/orpheus-3b-0.1-ft` | Serverless | REST, Streaming, WebSocket | $15 per 1M characters |
 | Kokoro | `hexgrad/Kokoro-82M` | Serverless | REST, Streaming, WebSocket | $4 per 1M characters |
+| Qwen3 TTS 12Hz 1.7B CustomVoice | `Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice` | Serverless | REST | $4 per 1M characters |
 | Cartesia Sonic 3 | `cartesia/sonic-3` | Serverless / Dedicated / Reserved | REST | Build Tier 2+ |
 | Cartesia Sonic 2 | `cartesia/sonic-2` | Serverless / Dedicated / Reserved | REST | $65 per 1M characters, Build Tier 2+ |
 | Cartesia Sonic | `cartesia/sonic` | Serverless | REST | Listed in `/audio/speech` reference enum |
@@ -32,6 +33,9 @@ These models are current in the latest text-to-speech guide and are not listed i
 
 Notes:
 - Orpheus and Kokoro support realtime WebSocket streaming for the lowest-latency TTS flows.
+- Qwen3 TTS CustomVoice (`Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice`): `response_format` is `wav`, `mp3`,
+  `raw`, or `mulaw` (not `opus`/`aac`/`flac`); `sample_rate` is `24000` (default) or `8000`;
+  `alignment=word` is not supported. Nine preset voices; each speaks zh/en/fr/de/it/ja/ko/pt/ru/es.
 - Cartesia Sonic 2 and Sonic 3 require Build Tier 2 or higher on serverless and are also available on Dedicated and
   Reserved Endpoints.
 - The `/audio/speech` API reference currently enumerates `cartesia/sonic`, `hexgrad/Kokoro-82M`, and
@@ -191,6 +195,12 @@ curl -X GET "https://api.together.ai/v1/voices?model=canopylabs/orpheus-3b-0.1-f
 `jf_tebukuro`, `jm_kumo`, `zf_xiaobei`, `zf_xiaoni`, `zf_xiaoxiao`, `zf_xiaoyi`, `zm_yunjian`,
 `zm_yunxi`, `zm_yunxia`, `zm_yunyang`, `ef_dora`, `em_alex`, `em_santa`, `ff_siwis`, `hf_alpha`,
 `hf_beta`, `hm_omega`, `hm_psi`, `if_sara`, `im_nicola`, `pf_dora`, `pm_alex`, `pm_santa`
+
+### Qwen3 TTS CustomVoice
+
+`vivian` (zh), `serena` (zh), `uncle_fu` (zh), `dylan` (zh Beijing), `eric` (zh Sichuan),
+`ryan` (en), `aiden` (en), `ono_anna` (ja), `sohee` (ko). Each voice speaks every supported
+language: zh, en, fr, de, it, ja, ko, pt, ru, es.
 
 ### Cartesia
 
