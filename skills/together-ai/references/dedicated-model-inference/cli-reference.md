@@ -82,11 +82,15 @@ name/ID (adds a deployment to it).
 | `--scale-down-window` | — | Cooldown seconds between scale-downs. |
 | `--model-revision` | latest | Model revision ID (`rv_...`) to pin. |
 | `--scaling-metric` / `--scaling-target` / `--scaling-percentile` | — | Autoscale on one metric (pair with a `--min`/`--max` range): metric name + target, optional percentile (`p50`/`p90`/`p95`/`p99`, latency metrics only). The CLI takes a single metric as flat flags — the JSON `scaling_metrics` array is SDK/API-only. |
-| `--placement` | — | Placement profile ID to use. |
-| `--placement.regions` | — | Comma-separated inline placement regions (mutually exclusive with `--placement`). |
-| `--placement.constraint` | — | `required` or `preferred` — how strictly to enforce inline placement regions. |
-| `--placement.hipaa` | off | Require HIPAA-eligible placement. |
+| `--placement` | — | Placement profile ID (`pp_...`) to attach. Mutually exclusive with inline `--placement.regions`. |
+| `--placement.regions` | — | Comma-separated inline placement regions. Each entry is an exact name (`us-east-1`) or a prefix pattern (`us-*`, `us-east-*`). Quote patterns so the shell does not expand `*`. Mutually exclusive with `--placement`. |
+| `--placement.constraint` | — | `required` or `preferred` — how strictly to enforce inline placement regions. With `required`, a pattern that matches no available cluster leaves the deployment unscheduled. |
+| `--placement.hipaa` | off | Require HIPAA-eligible placement (replicas only on HIPAA-attested clusters). Enforced strictly, regardless of `--placement.constraint`. |
 | `--inactive-timeout` | off | Minutes without requests before the deployment stops itself (30–1440; `0` disables). |
+
+Placement is set at deploy time and cannot be changed on an existing deployment. A prefix
+pattern covers every matching region, including regions added later. When you pass two or more
+regions or a pattern, the scheduler tries to spread replicas across the matching regions.
 
 Without `--inactive-timeout`, a deployment runs and bills until you stop it. The scale-to-zero
 window is an SDK/API autoscaling field (`scale_to_zero_window`), not a CLI flag.
@@ -100,6 +104,12 @@ tg beta endpoints deploy ml_CbJNwQC2ZqCU2iFT3mrCh \
   --endpoint my-endpoint \
   --config cr_CbzGdmn14t3HYrXXitmKa \
   --min-replicas 1 --max-replicas 10
+
+# Inline placement with a US prefix pattern (quote the *)
+tg beta endpoints deploy ml_CbJNwQC2ZqCU2iFT3mrCh \
+  --endpoint us-only \
+  --placement.regions "us-*" \
+  --placement.constraint required
 ```
 
 Output includes the endpoint ID (`ep_...`), deployment ID (`dep_...`), and the **endpoint

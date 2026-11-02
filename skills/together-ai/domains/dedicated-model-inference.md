@@ -102,6 +102,10 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
   endpoint, wait for `READY`, then shift traffic gradually with `--traffic-weight` (and
   replica counts), watching the dashboard between steps. Take the old deployment out with
   `--traffic-weight 0`, then scale it down and delete it.
+- **Placement is set at deploy time** and cannot be changed on an existing deployment. Pass
+  `--placement <pp_...>` or inline `--placement.regions` with exact names (`us-east-1`) or
+  prefix patterns (`us-*`, `us-east-*`; quote patterns in the shell). With `required`, an
+  unmatched pattern leaves the deployment unscheduled. See cli-reference.md.
 - The `client.beta.*` SDK surface and `together beta` CLI are **beta**: pin a current SDK
   release (`uv pip install --upgrade together`) and expect the surface to evolve.
 
@@ -132,7 +136,7 @@ only for the detail named in its row, and read just that section; each starts wi
 |---|---|---|---|
 | [scripts/dedicated-model-inference/deploy_model.py](scripts/dedicated-model-inference/deploy_model.py) | 254 | SDK path: deploy, poll to READY, infer on the dedicated base URL, scale, clean up | scripting the lifecycle in Python |
 | [scripts/dedicated-model-inference/upload_custom_model.py](scripts/dedicated-model-inference/upload_custom_model.py) | 145 | upload custom weights or a LoRA adapter, then deploy | serving your own weights |
-| [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
+| [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 307 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
 | [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
 | [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
 | [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
