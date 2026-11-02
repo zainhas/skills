@@ -94,7 +94,8 @@ together beta jig deploy [flags]
 | `--tag <tag>` | Image tag |
 | `--warmup` | Pre-generate compile caches (requires GPU) |
 | `--build-only` | Build and push only, skip deployment creation |
-| `--image <ref>` | Deploy an existing image, skip build and push |
+| `--image <ref>` | Deploy an existing image, skip build and push; overrides `image` in `[tool.jig.deploy]` |
+| `--detach` | Return once the deployment is created or updated, without waiting for a replica to become ready (use when model load exceeds ~2 minutes) |
 
 ### jig status
 
@@ -307,10 +308,18 @@ together beta jig secrets list
 
 ### jig secrets unset
 
-Remove a secret.
+Remove a secret from local state without touching the deployment.
 
 ```shell
-together beta jig secrets unset <name>
+together beta jig secrets unset --name <name>
+```
+
+### jig secrets delete
+
+Delete a secret from the deployment and unset it locally.
+
+```shell
+together beta jig secrets delete --name <name>
 ```
 
 ## Volumes Commands
@@ -436,7 +445,8 @@ model = load_model(device=device)
 | `port` | int | `8000` | Container listen port |
 | `health_check_path` | string | `"/health"` | Health endpoint (must return 200 when ready) |
 | `termination_grace_period_seconds` | int | `300` | Shutdown timeout for in-flight jobs |
-| `command` | string[] | `null` | Override startup command at deploy time (e.g., `["python", "app.py", "--queue"]`) |
+| `command` | string[] | `null` | Override startup command at deploy time (e.g., `["python", "app.py", "--queue"]`); takes precedence over `[tool.jig.image].cmd` |
+| `image` | string | `null` | Deploy an existing image instead of building; skips build/push (`jig build` errors). Pair with `command` for stock images such as `vllm/vllm-openai:v0.17.1`. CLI `--image` overrides this. |
 
 ### `[tool.jig.deploy.environment_variables]`
 
@@ -449,18 +459,28 @@ TORCH_COMPILE = "1"
 LOG_LEVEL = "INFO"
 ```
 
-### `[tool.jig.autoscaling]`
+### `[tool.jig.deploy.autoscaling]`
 
-> **Not yet supported.** The autoscaling config below is planned but the API currently rejects
-> it with `unknown autoscaling metric`. Do not include `[tool.jig.autoscaling]` in your
-> `pyproject.toml` until this feature is live. Use `min_replicas` / `max_replicas` under
-> `[tool.jig.deploy]` for basic scaling control in the meantime.
+Controls how the deployment scales between `min_replicas` and `max_replicas`. See
+[Autoscaling](https://docs.together.ai/docs/together-deployments#autoscaling).
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `metric` | string | `QueueBacklogPerWorker` (queue workloads) or `CustomMetric` (Prometheus metric on `/metrics`) |
+| `target` | number | Scale target. For `QueueBacklogPerWorker`, `desired_replicas = queue_depth / target` (recommended `1.05`). For `CustomMetric`, defaults to `500` if omitted |
+| `custom_metric_name` | string | Required when `metric = "CustomMetric"`. Must match `^[a-zA-Z_:][a-zA-Z0-9_:]*$` (e.g. `vllm:num_requests_running`) |
 
 ```toml
-# NOT YET SUPPORTED -- will cause deployment failure
-[tool.jig.autoscaling]
-profile = "QueueBacklogPerWorker"
-targetValue = "1.05"
+[tool.jig.deploy.autoscaling]
+metric = "QueueBacklogPerWorker"
+target = 1.05
+```
+
+```toml
+[tool.jig.deploy.autoscaling]
+metric = "CustomMetric"
+custom_metric_name = "vllm:num_requests_running"
+target = 4
 ```
 
 ### `[[tool.jig.volume_mounts]]`
