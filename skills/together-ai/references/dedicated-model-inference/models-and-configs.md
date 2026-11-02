@@ -353,6 +353,8 @@ longer change a record's base model.
   `adapter_model.safetensors` at the source root.
 - **Job stuck in `Processing`** — the source usually can't be reached: expired presigned URL,
   or HF token lacking repo access.
-- **`401`/`403`** — check `TOGETHER_API_KEY`, HF token permissions, and presigned URL expiry.
+- **`401`/`403`** — for CLI uploads, run `tg whoami` (or `tg login` again); for SDK
+  uploads, confirm `TOGETHER_API_KEY` is set. If Together credentials are valid, check HF
+  token permissions and presigned URL expiry.
 - **Doubled slug in the catalog** (`your-project/google/gemma...`) — the record was created
   with an org-prefixed name; delete and re-create with the bare name.

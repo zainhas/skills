@@ -135,7 +135,7 @@ only for the detail named in its row, and read just that section; each starts wi
 | [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
 | [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
 | [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
-| [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
+| [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 360 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
 
 ## Docs
 

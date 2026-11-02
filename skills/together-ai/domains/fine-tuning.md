@@ -21,6 +21,8 @@ tokens. Serving the result is `domains/dedicated-model-inference.md`; measuring 
 
 - Use the method-specific script; each method has its own data format and parameters.
 - Parameterize dataset paths, model IDs, and suffixes instead of hardcoding a demo dataset.
+- A 401 or 403 on training-file upload means missing or inactive credentials: for the CLI,
+  run `tg whoami` or `tg login`; for the SDK, confirm `TOGETHER_API_KEY` is an active key.
 
 ## Open next
 
