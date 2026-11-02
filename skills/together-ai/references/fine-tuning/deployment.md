@@ -16,9 +16,13 @@ A completed job is already a private model in your project, so it deploys on ded
 inference (DMI) with no upload step. Deploy it by its model object ID (`ml_...`): `model_object_id`
 in `tg fine-tuning retrieve`, or `job.api_model_object_id` in the Python SDK. `model_output_name`
 (`x_model_output_name` in the SDK) is not a deployable identifier. This needs `together` 3.x and CLI
-3.x. In 2.x, `client.endpoints.create(model=..., hardware=...)` and `tg endpoints create` call the
-retired v1 API, which returns HTTP 403 `endpoints_v1_create_access_disabled`. Scaling, traffic
-splits, and teardown details are in `domains/dedicated-model-inference.md`.
+3.x. In SDK 2.x, `client.endpoints.create(model=..., hardware=...)` calls the retired v1 API and
+returns HTTP 403 `endpoints_v1_create_access_disabled`. Together CLI 2.x hits the same 403 via
+`tg endpoints create` but reports `You don't have permission to access this resource`;
+`tg endpoints deploy` fails with `Unknown command "deploy"`. Upgrade with
+`uv tool install "together[cli]" --upgrade` and confirm `tg --version` is `3.0.0` or later —
+the API key and model are not the problem. Scaling, traffic splits, and teardown details are in
+`domains/dedicated-model-inference.md`.
 
 The CLI creates the endpoint, attaches a deployment, and routes all traffic to it in one step:
 

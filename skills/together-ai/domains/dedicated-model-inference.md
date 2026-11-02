@@ -21,11 +21,15 @@ Together CLI (`tg beta ...` — install with `uv tool install "together[cli]"`; 
 
 > **The legacy v1 dedicated endpoints API is retired.** The old flow (`client.endpoints.create`
 > with `model=` + `hardware=`, hardware IDs like `1x_nvidia_h100_80gb_sxm`, the `together
-> endpoints` CLI *without* `beta`) no longer accepts new endpoints: `POST /v1/endpoints`,
-> `client.endpoints.create(...)`, and `tg endpoints create` return
-> `endpoints_v1_create_access_disabled` (HTTP 403), and a stopped/paused v1 endpoint can't be
-> restarted. Already-running v1 endpoints keep serving until further notice; everything new —
-> and any redeploy of a stopped v1 endpoint — uses the v2 flow this guide describes.
+> endpoints` CLI *without* `beta`) no longer accepts new endpoints. `POST /v1/endpoints` and
+> SDK versions before 3.0 (`client.endpoints.create(...)`) return
+> `endpoints_v1_create_access_disabled` (HTTP 403). Together CLI 2.x (`tg endpoints create`)
+> gets the same 403 but reports `You don't have permission to access this resource`;
+> `tg endpoints deploy` fails with `Unknown command "deploy"` until you upgrade to CLI 3.0
+> (`uv tool install "together[cli]" --upgrade`, then confirm `tg --version` is `3.0.0` or
+> later). A stopped/paused v1 endpoint can't be restarted. Already-running v1 endpoints keep
+> serving until further notice; everything new — and any redeploy of a stopped v1 endpoint —
+> uses the v2 flow this guide describes.
 
 Hand-offs: the request shape for inference is the same as serverless, so
 `domains/chat-completions.md` covers calling the model; training is `domains/fine-tuning.md`;
@@ -135,7 +139,7 @@ only for the detail named in its row, and read just that section; each starts wi
 | [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
 | [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
 | [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
-| [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
+| [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 360 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
 
 ## Docs
 

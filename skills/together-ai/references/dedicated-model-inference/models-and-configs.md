@@ -48,8 +48,10 @@ it directly by its model object ID (the `ml_...` value: `model_object_id` from `
 retrieve`, or `status.api_model_object_id` in the Python SDK — *not* the old
 `x_model_output_name`, which isn't a deployable identifier):
 `tg beta endpoints deploy <ml_id> --endpoint <name>`. Deploying a fine-tune on the legacy v1
-API is retired — `client.endpoints.create` / `tg endpoints create` now return
-`endpoints_v1_create_access_disabled` (HTTP 403); use this v2 path instead.
+API is retired — `client.endpoints.create` (SDK before 3.0) returns
+`endpoints_v1_create_access_disabled` (HTTP 403); CLI 2.x (`tg endpoints create`) gets the same
+403 as `You don't have permission to access this resource`, and `tg endpoints deploy` is
+`Unknown command "deploy"` until CLI 3.0. Use this v2 path instead.
 
 Not every model is deployable, and a fine-tuned model deploys only if its base architecture is
 supported. Don't hardcode model names — list the catalog and use real IDs.
