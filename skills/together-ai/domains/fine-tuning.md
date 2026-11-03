@@ -21,6 +21,9 @@ tokens. Serving the result is `domains/dedicated-model-inference.md`; measuring 
 
 - Use the method-specific script; each method has its own data format and parameters.
 - Parameterize dataset paths, model IDs, and suffixes instead of hardcoding a demo dataset.
+- For MoE expert LoRA, set `lora_trainable_modules` to `w_up,w_gate,w_down` (optionally combined
+  with attention modules). Expert modules are accepted only on some MoE models — confirm with
+  `tg fine-tuning model-limits MODEL` before creating the job.
 
 ## Open next
 
@@ -33,7 +36,7 @@ tokens. Serving the result is `domains/dedicated-model-inference.md`; measuring 
 | [scripts/fine-tuning/vlm_finetune.py](scripts/fine-tuning/vlm_finetune.py) | 312 | image-text data and VLM job | vision-language tuning |
 | [references/fine-tuning/data-formats.md](references/fine-tuning/data-formats.md) | 368 | every dataset format (conversational, instruction, DPO, reasoning, tools, VLM), loss masking, sample weights, validation | preparing or debugging a dataset |
 | [references/fine-tuning/supported-models.md](references/fine-tuning/supported-models.md) | 185 | models per method, recommended starting models, BYOM | choosing a base model |
-| [references/fine-tuning/deployment.md](references/fine-tuning/deployment.md) | 318 | deploying on dedicated model inference (CLI and SDK) or downloading weights, training parameters, monitoring, continued fine-tuning, pricing | tuning hyperparameters or deploying the result |
+| [references/fine-tuning/deployment.md](references/fine-tuning/deployment.md) | 368 | deploying on dedicated model inference (CLI and SDK) or downloading weights, training parameters, LoRA target modules / expert LoRA, monitoring, continued fine-tuning, pricing | tuning hyperparameters, LoRA modules, or deploying the result |
 
 ## Docs
 

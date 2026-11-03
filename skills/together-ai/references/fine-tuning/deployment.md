@@ -3,6 +3,7 @@
 
 - [Deployment Options](#deployment-options)
 - [Training Parameters](#training-parameters)
+- [LoRA target modules](#lora-target-modules)
 - [Job Monitoring](#job-monitoring)
 - [Continued Fine-tuning](#continued-fine-tuning)
 - [Pricing](#pricing)
@@ -186,6 +187,8 @@ tar -xvf model.tar
 | `lora` | bool | true | Use LoRA method |
 | `lora_r` | int | 64 | LoRA rank. Per-model max -- 64 for most models; 16 for Moonshot Kimi-K2 family, Z.ai GLM-5/5.1, and DeepSeek R1/V3 (non-distill) families. See [supported-models.md](supported-models.md). |
 | `lora_alpha` | int | 16 | LoRA scaling factor |
+| `lora_dropout` | float | - | LoRA dropout |
+| `lora_trainable_modules` | string | `all-linear` | Comma-separated module names to adapt. Default `all-linear` uses the model's default target modules. Each name must be on the model's allow-list (see [LoRA target modules](#lora-target-modules)). |
 | `train_on_inputs` | bool/str | "auto" | Train on prompts/user msgs |
 | `n_evals` | int | 0 | Validation evaluations (>0 to use validation set) |
 | `wandb_api_key` | string | - | W&B integration |
@@ -210,6 +213,54 @@ tar -xvf model.tar
 |-----------|------|---------|-------------|
 | `from_hf_model` | string | - | HuggingFace model ID |
 | `hf_api_token` | string | - | HuggingFace token (for private repos) |
+
+## LoRA target modules
+
+When `lora_trainable_modules` is unset, the job uses `all-linear` (the model's default attention /
+linear modules). To customize, pass a comma-separated list. Whitespace around names is ignored; a
+non-empty value that parses to no modules (for example `","`) is rejected.
+
+Check a model's accepted modules and ranks with:
+
+```shell
+tg fine-tuning model-limits MODEL
+```
+
+### Expert LoRA (MoE)
+
+On mixture-of-experts (MoE) models, you can adapt the expert feed-forward projections instead of
+(or in addition to) the attention projections. Prefer expert LoRA when the task depends on the
+model's domain knowledge in the feed-forward experts rather than its attention patterns.
+
+Set `lora_trainable_modules` to the expert modules `w_up`, `w_gate`, and `w_down`:
+
+```python
+from together import Together
+
+client = Together()
+
+job = client.fine_tuning.create(
+    training_file=file_id,
+    model="Qwen/Qwen3.6-35B-A3B",
+    lora=True,
+    lora_trainable_modules="w_up,w_gate,w_down",
+)
+```
+
+```shell
+tg fine-tuning create \
+  --training-file "$FILE_ID" \
+  --model "Qwen/Qwen3.6-35B-A3B" \
+  --lora \
+  --lora-trainable-modules "w_up,w_gate,w_down"
+```
+
+Hard rules:
+
+- Expert LoRA is available only on some MoE models. Others reject expert modules at job creation.
+  Confirm with `tg fine-tuning model-limits MODEL` before submitting.
+- You can train attention and expert projections in the same job by listing both sets, for example
+  `k_proj,o_proj,q_proj,v_proj,w_up,w_gate,w_down`.
 
 ## Job Monitoring
 
