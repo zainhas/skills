@@ -1,7 +1,7 @@
 # Dedicated Model Inference — Traffic Routing
 
 How an endpoint decides which deployment serves each request, and the tools for moving
-traffic: weighted splits, A/B tests, and shadow experiments.
+traffic: weighted splits, managed rollouts, A/B tests, and shadow experiments.
 
 ## Contents
 
@@ -9,6 +9,7 @@ traffic: weighted splits, A/B tests, and shadow experiments.
 - [Stickiness](#stickiness)
 - [Observing routing](#observing-routing)
 - [Traffic splits (weights)](#traffic-splits-weights)
+- [Rollouts](#rollouts)
 - [Replace a deployment (gradual cutover)](#replace-a-deployment-gradual-cutover)
 - [A/B tests](#ab-tests)
 - [Shadow experiments](#shadow-experiments)
@@ -132,10 +133,35 @@ Semantics that trip people up:
 - An endpoint whose deployments are all stopped returns HTTP 400 `endpoint_not_ready`; a READY
   deployment that is missing from the split (or has weight 0) gets `endpoint_not_configured`.
 
+## Rollouts
+
+Prefer a managed rollout over hand-editing weights when migrating a deployment on live traffic.
+`tg endpoints rollout` shifts the source's share to a target under the same endpoint (canary,
+blue-green, or rolling). Eligibility is checked at create and again at start; a deployment with
+a stop in progress never qualifies:
+
+- **Source:** `READY`, or `SCALING` with at least one ready replica and a ready routing tier;
+  positive traffic-split weight; not in a shadow experiment or A/B test.
+- **Target:** `READY`, `STOPPED`, or `SCALING` (does not need to be `READY` yet); not already
+  holding 100% of endpoint traffic; not in a shadow/A/B experiment (pass `--detach` to detach
+  the target automatically; detach a source yourself); target project in good billing standing.
+- Neither side may have an inactivity timeout.
+
+If either side is still `SCALING` when the rollout starts, the first traffic shift waits until
+that deployment has enough ready replicas. After 30 minutes without them, the rollout pauses
+with `UNDER_SERVED`.
+
+```bash
+tg endpoints rollout dep_target456 --source dep_source123 --canary
+```
+
+See the [rollouts guide](https://docs.together.ai/docs/dedicated-endpoints/rollouts) for
+strategies, metric gates, pause/cancel/promote, and troubleshooting.
+
 ## Replace a deployment (gradual cutover)
 
-To migrate an endpoint to a new model version, config, or hardware on live traffic, run both
-deployments side by side and shift traffic with weights and replica counts:
+For a managed migration, use a [rollout](#rollouts). To migrate by hand, run both deployments
+side by side and shift traffic with weights and replica counts:
 
 1. Create the new deployment on the **same endpoint**, sized for its eventual share, and wait
    for `READY`. It receives no traffic yet (weight unset).
@@ -284,7 +310,7 @@ lifetimes.
 | Goal | Tool |
 | --- | --- |
 | Serve two deployments for redundancy | Traffic split with weights. |
-| Replace a deployment on live traffic | Gradual cutover with `--traffic-weight` steps. |
+| Replace a deployment on live traffic | Managed rollout (`tg endpoints rollout`); manual gradual cutover with `--traffic-weight` as a fallback. |
 | Measure a candidate on a fixed slice of user-visible traffic | A/B test. |
 | Test a candidate with zero user impact / warm it up | Shadow experiment. |
-| Ship the A/B or shadow winner | Delete the experiment, then shift weights to the winner. |
+| Ship the A/B or shadow winner | Delete the experiment, then shift weights to the winner (or start a rollout). |

@@ -162,7 +162,10 @@ Notes:
   still an SDK/API operation (`endpoints.update(traffic_split=[...])`).
 - To stop an idle deployment by hand, set `--min-replicas 0 --max-replicas 0`; to have it stop
   itself, set `--inactive-timeout`. A deployment with an inactivity timeout cannot take part in
-  a rollout.
+  a rollout. Managed rollouts (`tg endpoints rollout`) accept a source in `READY` or `SCALING`
+  (with a ready replica and routing tier) and a target in `READY`, `STOPPED`, or `SCALING`;
+  eligibility is re-checked at start, and a still-`SCALING` side delays the first traffic shift
+  for up to 30 minutes before pausing with `UNDER_SERVED`.
 
 ## endpoints rm (smart delete)
 

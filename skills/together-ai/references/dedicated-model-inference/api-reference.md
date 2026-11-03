@@ -272,6 +272,11 @@ Caveats:
 Idle shutdown is off by default: a deployment runs and bills until you stop it, unless you set
 `inactive_timeout` (30–1440 minutes; `0` disables) on the deployment, which stops it after that
 long without requests. A deployment with an inactivity timeout cannot take part in a rollout.
+Managed-rollout eligibility is checked at create and again at start (a stop-in-progress
+deployment never qualifies): the source must be `READY`, or `SCALING` with at least one ready
+replica and a ready routing tier; the target must be `READY`, `STOPPED`, or `SCALING`. If either
+side is still `SCALING` when the rollout starts, the first traffic shift waits for enough ready
+replicas; after 30 minutes the rollout pauses with `UNDER_SERVED`.
 
 ```python
 # Stop (drains, then STOPPED; billing stops)
