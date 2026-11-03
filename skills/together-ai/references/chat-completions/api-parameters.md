@@ -342,14 +342,19 @@ Multimodal content (vision models):
 
 ## OpenAI Compatibility
 
-Migrate from the OpenAI SDK by changing the base URL and API key while keeping the chat/completions
-shape the same:
+Point an OpenAI or Anthropic client at Together by changing the API key and base URL. Chat
+completions, vision, tools, structured outputs, embeddings, images, and audio work as drop-ins
+through the OpenAI SDK. Together also implements the OpenAI Responses API and the Anthropic
+Messages API (see below). Use the native Together SDK when you need Together-only helpers such as
+`.with_raw_response`, typed reasoning fields, or other platform-specific workflows.
+
+### Chat completions (OpenAI SDK)
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://api.together.xyz/v1",
+    base_url="https://api.together.ai/v1",
     api_key="YOUR_TOGETHER_API_KEY",
 )
 response = client.chat.completions.create(
@@ -359,8 +364,66 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-Use the native Together SDK when you need Together-only helpers such as `.with_raw_response`,
-typed reasoning fields, or other platform-specific workflows already covered by this skill.
+US-only processing: use `https://us-api.together.ai/v1` (select models; 1.25× serverless rates).
+
+OpenAI Assistants/Threads/Runs, OpenAI-shaped batches, and `moderations.create` are not supported.
+OpenAI-shaped `files.*` is only partial; use Together's files and batch APIs instead.
+
+### Responses API (OpenAI SDK)
+
+`client.responses.create` → `POST /v1/responses`. Supported models: `zai-org/GLM-5.2`,
+`zai-org/GLM-5.3`. Other serverless models may accept the call but can return malformed output.
+
+```python
+response = client.responses.create(
+    model="zai-org/GLM-5.3",
+    input="Explain mixture-of-experts in two sentences.",
+)
+print(response.output_text)
+```
+
+Hard rules:
+
+- Together does **not** store responses. `store` is always effectively false; `previous_response_id`
+  and `conversation` return 400. Append prior `output` items to `input` for multi-turn.
+- `responses.retrieve` / `delete` / `cancel` / `input_items.list`, `input_tokens.count`,
+  `responses.compact`, and `conversations.*` return 404 `unsupported_operation`.
+- `background=true` returns 400. `input_image` / `input_file` return 400 on GLM-5.2/5.3 (except an
+  `input_image` that only has `file_id`, which is dropped silently).
+- Dedicated endpoints: base URL `https://api-inference.together.ai/v1`, `model` = endpoint string.
+
+### Messages API (Anthropic SDK)
+
+`client.messages.create` → `POST /v1/messages`. Anthropic SDK `base_url` is `https://api.together.ai`
+(no `/v1`; the SDK adds it). Same supported models as Responses. Dedicated: base URL
+`https://api-inference.together.ai`. Auth accepts `x-api-key` or `Authorization: Bearer` (Bearer
+wins if both are set).
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_TOGETHER_API_KEY",
+    base_url="https://api.together.ai",
+)
+message = client.messages.create(
+    model="zai-org/GLM-5.3",
+    max_tokens=4096,
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(message.content[0].text)
+```
+
+Hard rules:
+
+- `max_tokens` is required. GLM-5.3 reasons even when thinking is off; that reasoning counts toward
+  `max_tokens`. Empty text with `stop_reason=max_tokens` means raise `max_tokens` and check
+  `stop_reason` before using the text (SDK helpers do not error).
+- `thinking.type=enabled` needs `budget_tokens`, but Together does not enforce the budget; only
+  `max_tokens` limits reasoning + answer combined. Pass `thinking` blocks back unchanged in tool
+  loops (`signature` is empty).
+- `messages.count_tokens` is supported. `messages.batches.*` is not (use Together's batch API).
+  Anthropic `models.list` is not usable against Together's `/v1/models` shape.
 
 ## Rate Limits & Build Tiers
 

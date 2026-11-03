@@ -2,7 +2,9 @@
 
 Serverless, OpenAI-compatible text generation: one call, billed per token. Covers plain and
 streaming chat, multi-turn state, tool calling, structured (JSON) output, reasoning models, and
-image input to vision models.
+image input to vision models. Apps built on the OpenAI Responses API or the Anthropic Messages API
+can also target Together by changing key, base URL, and model (see OpenAI Compatibility in
+`references/chat-completions/api-parameters.md`).
 
 Hand-offs: many prompts with no user waiting go to `domains/batch-inference.md`; retrieval goes to
 `domains/embeddings.md`; always-on hosting goes to `domains/dedicated-model-inference.md`. For a
@@ -62,6 +64,12 @@ print(resp.choices[0].message.content)
 - Token usage: reasoning models nest counts OpenAI-style
   (`usage.completion_tokens_details.reasoning_tokens`, `usage.prompt_tokens_details.cached_tokens`)
   but some models return `cached_tokens` flat on `usage`. Read both places.
+- Responses API (`openai` SDK `responses.create` → `POST /v1/responses`) and Messages API
+  (`anthropic` SDK `messages.create` → `POST /v1/messages`) are supported for
+  `zai-org/GLM-5.2` and `zai-org/GLM-5.3`. Other serverless models may accept requests but can
+  return malformed output. Together does not store Responses; send the full conversation each
+  turn. Messages requires `max_tokens`; GLM-5.3 can spend it on hidden reasoning and return empty
+  text with `stop_reason=max_tokens` — raise `max_tokens` and check `stop_reason`.
 
 ## Open next
 
@@ -77,7 +85,7 @@ Open a file only for the detail its row names. References over 100 lines start w
 | [scripts/chat-completions/async_parallel.py](scripts/chat-completions/async_parallel.py) | 50 | asyncio fan-out of independent requests | many requests and a user is waiting |
 | [scripts/chat-completions/debug_headers.py](scripts/chat-completions/debug_headers.py) (.ts) | 57 | raw response, rate-limit and routing headers | debugging latency, 429s, or routing |
 | [references/chat-completions/models.md](references/chat-completions/models.md) | 73 | model picks by use case, context lengths, vision and moderation models | choosing a model (verify it is live) |
-| [references/chat-completions/api-parameters.md](references/chat-completions/api-parameters.md) | 481 | every request parameter, message object, OpenAI-SDK compatibility, rate-limit tiers, HTTP status codes | a parameter or status code not covered above |
+| [references/chat-completions/api-parameters.md](references/chat-completions/api-parameters.md) | 544 | every request parameter, message object, OpenAI/Anthropic SDK compatibility (chat, Responses, Messages), rate-limit tiers, HTTP status codes | a parameter, drop-in SDK, or status code not covered above |
 | [references/chat-completions/function-calling-patterns.md](references/chat-completions/function-calling-patterns.md) | 841 | six calling patterns (parallel, multi-step, ...), `tool_choice`, tools plus structured output, best practices, supported models | a tool pattern the script does not show |
 | [references/chat-completions/structured-outputs.md](references/chat-completions/structured-outputs.md) | 541 | the three JSON modes, reasoning plus JSON, streaming JSON, troubleshooting | JSON output fails to parse or validate |
 | [references/chat-completions/reasoning-models.md](references/chat-completions/reasoning-models.md) | 481 | reasoning model table, effort levels, hybrid toggles, output format, token accounting | tuning reasoning depth or cost |
@@ -85,6 +93,9 @@ Open a file only for the detail its row names. References over 100 lines start w
 ## Docs
 
 - [Chat overview](https://docs.together.ai/docs/inference/chat/overview)
+- [OpenAI compatibility](https://docs.together.ai/docs/inference/openai-compatibility)
+- [Responses API](https://docs.together.ai/docs/inference/responses-api)
+- [Messages API](https://docs.together.ai/docs/inference/messages-api)
 - [Serverless models](https://docs.together.ai/docs/serverless/models)
 - [Function calling](https://docs.together.ai/docs/inference/function-calling/overview)
 - [Structured outputs](https://docs.together.ai/docs/inference/chat/structured-outputs)
