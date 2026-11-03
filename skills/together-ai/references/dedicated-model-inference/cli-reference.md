@@ -162,7 +162,10 @@ Notes:
   still an SDK/API operation (`endpoints.update(traffic_split=[...])`).
 - To stop an idle deployment by hand, set `--min-replicas 0 --max-replicas 0`; to have it stop
   itself, set `--inactive-timeout`. A deployment with an inactivity timeout cannot take part in
-  a rollout.
+  a rollout. For managed rollouts (`tg endpoints rollout`), `--final-target-replicas` is the
+  target's replica count at cutover only; afterward the target's autoscaling policy takes over.
+  Preview warns with `LANDING_MIN_ABOVE_CUTOVER` when a stopped target inherits a higher source
+  `min_replicas` than the cutover count.
 
 ## endpoints rm (smart delete)
 

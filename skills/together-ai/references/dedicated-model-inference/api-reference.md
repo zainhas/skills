@@ -183,6 +183,11 @@ Rules:
 - `min < max` — autoscaling on. With no metric specified, the platform scales on concurrent
   in-flight requests per replica (default target 8).
 - `0 / 0` — stops the deployment. `min 0` with a positive max is **rejected**.
+- After a managed rollout completes, `finalTargetReplicas` / `--final-target-replicas` is only
+  the cutover size. The target's autoscaling policy resumes from that count (it is not a new
+  standing floor). A pre-existing target keeps its own `min_replicas`; a target that started
+  stopped inherits the source's `min_replicas`. Preview warns with `LANDING_MIN_ABOVE_CUTOVER`
+  when cutover is below that inherited min.
 
 ```python
 client.beta.endpoints.deployments.update(

@@ -1,7 +1,7 @@
 # Dedicated Model Inference — Traffic Routing
 
 How an endpoint decides which deployment serves each request, and the tools for moving
-traffic: weighted splits, A/B tests, and shadow experiments.
+traffic: weighted splits, managed rollouts, A/B tests, and shadow experiments.
 
 ## Contents
 
@@ -9,6 +9,7 @@ traffic: weighted splits, A/B tests, and shadow experiments.
 - [Stickiness](#stickiness)
 - [Observing routing](#observing-routing)
 - [Traffic splits (weights)](#traffic-splits-weights)
+- [Rollouts (landing replicas)](#rollouts-landing-replicas)
 - [Replace a deployment (gradual cutover)](#replace-a-deployment-gradual-cutover)
 - [A/B tests](#ab-tests)
 - [Shadow experiments](#shadow-experiments)
@@ -132,9 +133,22 @@ Semantics that trip people up:
 - An endpoint whose deployments are all stopped returns HTTP 400 `endpoint_not_ready`; a READY
   deployment that is missing from the split (or has weight 0) gets `endpoint_not_configured`.
 
+## Rollouts (landing replicas)
+
+Prefer a managed rollout (`tg endpoints rollout`) for live migrations. `--final-target-replicas`
+sets how many replicas the target runs at cutover (the last step), not a standing floor. After
+the rollout completes, the target's autoscaling policy takes over and scales from that cutover
+count. A target that already had its own `min_replicas` keeps it; a target that started stopped
+inherits the source's `min_replicas`. Preview reports the post-rollout floor as
+`landingMinReplicas` / `landingMaxReplicas`, and warns with `LANDING_MIN_ABOVE_CUTOVER` when a
+stopped target would scale up from cutover to the inherited source min.
+
+See the [rollouts guide](https://docs.together.ai/docs/dedicated-endpoints/rollouts) for
+strategies, gates, and troubleshooting.
+
 ## Replace a deployment (gradual cutover)
 
-To migrate an endpoint to a new model version, config, or hardware on live traffic, run both
+For a managed migration, use a [rollout](#rollouts-landing-replicas). To migrate by hand, run both
 deployments side by side and shift traffic with weights and replica counts:
 
 1. Create the new deployment on the **same endpoint**, sized for its eventual share, and wait
@@ -284,7 +298,7 @@ lifetimes.
 | Goal | Tool |
 | --- | --- |
 | Serve two deployments for redundancy | Traffic split with weights. |
-| Replace a deployment on live traffic | Gradual cutover with `--traffic-weight` steps. |
+| Replace a deployment on live traffic | Managed rollout (`tg endpoints rollout`); manual gradual cutover with `--traffic-weight` as a fallback. |
 | Measure a candidate on a fixed slice of user-visible traffic | A/B test. |
 | Test a candidate with zero user impact / warm it up | Shadow experiment. |
 | Ship the A/B or shadow winner | Delete the experiment, then shift weights to the winner. |
