@@ -80,6 +80,7 @@ tg beta clusters create [OPTIONS]
 | `--duration-days` | number | Reservation length in days (only with `RESERVED` billing) |
 | `--nvidia-driver-version` | string | NVIDIA driver version (use `clusters list-regions` for options) |
 | `--cuda-version` | string | CUDA version (use `clusters list-regions` for options) |
+| `--nvidia-version-id` | string | NVIDIA version catalog ID from `list-regions` (exact driver, CUDA, and OS; alternative to the individual version flags) |
 | `--cluster-type` | enum | `KUBERNETES` or `SLURM` |
 | `--volume` | string | Existing storage volume ID to attach |
 | `--non-interactive` | -- | Skip interactive prompts. Required in CI. |
@@ -167,22 +168,46 @@ tg beta clusters delete [CLUSTER_ID]
 
 ### `clusters list-regions`
 
-List available regions, supported GPU types, and driver versions.
+List available regions, supported GPU types, and NVIDIA software configurations.
 
 ```shell
 tg beta clusters list-regions
 ```
 
-**Example output:**
+Without `--json`, the CLI prints one table row per NVIDIA software configuration:
+
+| Column | Description |
+|--------|-------------|
+| `ID` | Catalog ID to pass as `--nvidia-version-id` |
+| `Region` | Region name for the configuration |
+| `GPU Options` | Supported GPU types in that region |
+| `NVIDIA Driver` | NVIDIA driver version (for example, `595`) |
+| `CUDA Version` | CUDA version (for example, `13.2`) |
+| `OS` | Operating system for the configuration (for example, `ubuntu-22.04`) |
+
+**JSON example output:**
+
+```shell
+tg beta clusters list-regions --json
+```
 
 ```json
 {
   "regions": [
     {
       "driver_versions": [
-        {"cuda_version": "12.9", "nvidia_driver_version": "575"},
-        {"cuda_version": "12.8", "nvidia_driver_version": "570"},
-        {"cuda_version": "12.6", "nvidia_driver_version": "560"}
+        {
+          "id": "0195d44f-e3d0-7475-8197-2a7a7349ab65",
+          "cuda_version": "12.8",
+          "nvidia_driver_version": "570",
+          "os": "ubuntu-22.04"
+        },
+        {
+          "id": "019af67e-4ba5-7039-b8d8-de657e906261",
+          "cuda_version": "12.9",
+          "nvidia_driver_version": "575",
+          "os": "ubuntu-22.04"
+        }
       ],
       "name": "us-central-8",
       "supported_instance_types": [
@@ -193,6 +218,10 @@ tg beta clusters list-regions
   ]
 }
 ```
+
+Each driver version's `id` is its NVIDIA version catalog ID. Pass it to
+`tg beta clusters create --nvidia-version-id` to select that exact driver, CUDA,
+and OS combination. Use the `id` from the same region where you create the cluster.
 
 ### `clusters get-credentials`
 
