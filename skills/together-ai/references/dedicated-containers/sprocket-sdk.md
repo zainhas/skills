@@ -145,9 +145,12 @@ class CustomProcessor(sprocket.InputOutputProcessor):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TOGETHER_API_KEY` | Required | API key |
-| `TOGETHER_API_BASE_URL` | `https://api.together.ai` | API base URL |
-| `TERMINATION_GRACE_PERIOD_SECONDS` | 300 | Shutdown + prediction timeout |
+| `TOGETHER_DCI_SERVICE_TOKEN_FILE` | Set by platform | Path to the file with the deployment's service token. Sprocket 0.1.8+ uses this for queue authentication. |
+| `TOGETHER_API_KEY` | None | API key for queue authentication. Sprocket 0.1.8+ uses it only when `TOGETHER_DCI_SERVICE_TOKEN_FILE` is unset. |
+| `TOGETHER_API_BASE_URL` | `https://api.together.ai` | Base URL of the Together API |
+| `TOGETHER_DEPLOYMENT_NAME` | Set by platform | Deployment name when `name` is not passed to `sprocket.run` |
+| `SPROCKET_PREDICT_PATH` | `/generate` | Inference HTTP route when `predict_path` is not passed to `sprocket.run` |
+| `TERMINATION_GRACE_PERIOD_SECONDS` | 300 | Max seconds for graceful shutdown; also sets the prediction timeout |
 | `WORLD_SIZE` | 1 | GPU processes (set by torchrun) |
 
 ## Multi-GPU Pattern

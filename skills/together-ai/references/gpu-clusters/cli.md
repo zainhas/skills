@@ -74,7 +74,7 @@ tg beta clusters create [OPTIONS]
 |------|------|-------------|
 | `--name` | string | Name of the cluster |
 | `--num-gpus` | number | Number of GPUs (must be a multiple of 8) |
-| `--gpu-type` | enum | `H100_SXM`, `H200_SXM`, `B200_SXM`, `H100_SXM_INF`, `L40_PCIE`, `RTX_6000_PCI` |
+| `--gpu-type` | enum | `H100_SXM`, `H200_SXM`, `RTX_6000_PCI`, `L40_PCIE`, `B200_SXM`, `B300_SXM`, `GB200_SXM`, `H100_SXM_INF` |
 | `--region` | string | Region (use `clusters list-regions` to find valid regions) |
 | `--billing-type` | enum | `ON_DEMAND` or `RESERVED` |
 | `--duration-days` | number | Reservation length in days (only with `RESERVED` billing) |
@@ -290,6 +290,8 @@ tg beta clusters storage delete [VOLUME_ID]
 | `H100_SXM_INF` | NVIDIA H100 | 80GB | Inference-optimized, lower IB bandwidth |
 | `H200_SXM` | NVIDIA H200 | 141GB | InfiniBand networking |
 | `B200_SXM` | NVIDIA B200 | 192GB | InfiniBand networking |
+| `B300_SXM` | NVIDIA B300 | — | Availability varies by region |
+| `GB200_SXM` | NVIDIA GB200 | — | Availability varies by region |
 | `L40_PCIE` | NVIDIA L40 | 48GB | PCIe |
 | `RTX_6000_PCI` | NVIDIA RTX 6000 | 24GB | PCIe |
 

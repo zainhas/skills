@@ -29,12 +29,11 @@ Jig commands are under `together beta jig`.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `TOGETHER_API_KEY` | Required | Your Together API key |
-| `TOGETHER_DEBUG` | `""` | Enable debug logging (`"1"` or `"true"`) |
+| `TOGETHER_API_KEY` | None | Your Together API key. Not required when logged in with `tg login`. |
 | `WARMUP_ENV_NAME` | `TORCHINDUCTOR_CACHE_DIR` | Environment variable for cache location |
 | `WARMUP_DEST` | `torch_cache` | Cache directory path in container |
 
-All commands are subcommands of `together beta jig`. Use `--config <path>` to specify a custom config file (default: `pyproject.toml`).
+All commands are subcommands of `together beta jig` (also `tg beta jig`). Use `--config <path>` to specify a custom config file (default: `pyproject.toml`). Pass `--debug` on any command to print each HTTP request and response and write a full log to a temporary file.
 
 ## Build Commands
 
@@ -521,6 +520,5 @@ mount_path = "/models"
 ## Debug Mode
 
 ```shell
-export TOGETHER_DEBUG=1
-together beta jig deploy
+tg beta jig deploy --debug
 ```

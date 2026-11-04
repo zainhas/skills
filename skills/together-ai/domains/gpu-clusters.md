@@ -1,6 +1,6 @@
 # Together AI: GPU Clusters
 
-GPU clusters (H100, H200, B200, B300, and other types; availability varies by region) with
+GPU clusters (H100, H200, B200, B300, GB200, and other types; availability varies by region) with
 Kubernetes or Slurm, shared storage, and credentials, for distributed training, multi-node
 inference, and HPC. Sizes are multiples of 8 GPUs. `ON_DEMAND` bills from creation until you
 delete the cluster; `RESERVED` is charged for the full reserved term. Shared storage bills
@@ -52,8 +52,8 @@ read just that section; long ones start with `## Contents`.
 | [references/gpu-clusters/pricing-and-discovery.md](references/gpu-clusters/pricing-and-discovery.md) | 82 | authoritative pricing and stock surfaces, read-only inventory commands, picking the cheapest live option, one-hour on-demand plan | pricing, availability, or a plan without provisioning |
 | [scripts/gpu-clusters/manage_cluster.py](scripts/gpu-clusters/manage_cluster.py) (.ts) | 237 | create, poll, credentials, scale, delete | provisioning or changing a cluster |
 | [scripts/gpu-clusters/manage_storage.py](scripts/gpu-clusters/manage_storage.py) | 129 | create, list, resize, delete shared volumes | managing storage on its own |
-| [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 305 | `tg` cluster and storage commands, global flags, instance types, driver versions | a CLI flag or driver version |
-| [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 478 | cluster and storage endpoints, request fields, regions, instance types | an API field the script does not set |
+| [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 307 | `tg` cluster and storage commands, global flags, instance types, driver versions | a CLI flag or driver version |
+| [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 480 | cluster and storage endpoints, request fields, regions, instance types | an API field the script does not set |
 | [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 571 | architecture, access, Slurm config, GPU containers, scaling, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
 
 ## Docs
