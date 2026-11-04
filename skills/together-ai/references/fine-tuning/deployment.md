@@ -310,8 +310,11 @@ response = client.fine_tuning.create(
 
 - Based on total tokens processed: `total_tokens x per_token_rate`
 - `total_tokens = (n_epochs x training_tokens) + (n_evals x validation_tokens)`
-- Cost varies by model size, method (LoRA vs Full), and type (SFT vs DPO)
-- No minimum price -- pay only for tokens processed
+- Each model has its own per-token rates for method (SFT vs DPO) and type (LoRA vs Full)
+- $4.00 minimum charge per job; some models are exempt
 - Exact token count and price available after tokenization via dashboard or
-  `together fine-tuning retrieve $JOB_ID`
+  `tg fine-tuning retrieve $JOB_ID` / `client.fine_tuning.retrieve(...)`
+- Estimate before create: CLI confirmation, console estimate, or
+  `client.fine_tuning.estimate_price(...)`
+- Current rates: https://www.together.ai/pricing#fine-tuning
 - Dedicated endpoint hosting charges are separate (per-minute while running)
