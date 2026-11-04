@@ -37,6 +37,7 @@ structured outputs are supported.
 | Organization | Model | API String | Context | Price in / out | Tools | JSON |
 |-------------|-------|-----------|---------|---------------|-------|------|
 | Moonshot | Kimi K3 | `moonshotai/Kimi-K3` | 1,048,576 | 3.00 / 15.00 | Yes | Yes |
+| Moonshot | Kimi K3.1 Pro | `moonshotai/Kimi-K3.1-Pro` | 1,048,576 | 2.00 / 10.00 | Yes | Yes |
 | Z.ai | GLM-5.3 | `zai-org/GLM-5.3` | 1,048,575 | 1.40 / 4.40 | Yes | Yes |
 | Z.ai | GLM-5.3 Flash | `zai-org/GLM-5.3-Flash` | 1,048,575 | 0.15 / 0.50 | Yes | Yes |
 | Z.ai | GLM-5.2 | `zai-org/GLM-5.2` | 1,048,575 | 1.40 / 4.40 | Yes | Yes |
@@ -64,6 +65,7 @@ structured outputs are supported.
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 |
 | MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 |
 | Moonshot | Kimi K3 | `moonshotai/Kimi-K3` | 1,048,576 |
+| Moonshot | Kimi K3.1 Pro | `moonshotai/Kimi-K3.1-Pro` | 1,048,576 |
 
 Start with `Qwen/Qwen3.5-9B` unless the task needs a larger model.
 
