@@ -510,12 +510,14 @@ console.log(`Title: ${result.title}`);
 Serverless models that support this as of 2026-10-07, per the [serverless catalog](https://docs.together.ai/docs/serverless/models). Availability changes; a request with `max_tokens=1` confirms a model is live.
 
 - `moonshotai/Kimi-K3`
+- `moonshotai/Kimi-K3.1-Pro`
 - `zai-org/GLM-5.3`
 - `zai-org/GLM-5.3-Flash`
 - `zai-org/GLM-5.2`
 - `deepseek-ai/DeepSeek-V4-Pro-0813`
 - `deepseek-ai/DeepSeek-V4-Flash-0731`
 - `deepseek-ai/DeepSeek-V4.1-Flash`
+- `deepseek-ai/DeepSeek-V4.1-Flash-1017`
 - `thinkingmachines/Inkling`
 - `MiniMaxAI/MiniMax-M3`
 - `Qwen/Qwen3.5-9B`
