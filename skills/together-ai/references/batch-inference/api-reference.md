@@ -38,6 +38,7 @@ Each line is a JSON object with two required fields:
 
 - `custom_id` (string, required): Unique identifier for tracking (max 64 chars)
 - `body` (object, required): Request matching the `/v1/chat/completions` schema
+- Every line must use the same `body.model`. Mixing models fails validation during `VALIDATING`
 
 ## Output File Format (JSONL)
 
@@ -91,9 +92,13 @@ content = (
 | `VALIDATING` | Input file being validated |
 | `IN_PROGRESS` | Processing requests |
 | `COMPLETED` | All requests processed |
-| `FAILED` | Processing failed |
+| `FAILED` | Input file failed validation, or processing failed |
 | `EXPIRED` | Job exceeded time limit |
 | `CANCELLED` | User cancelled |
+
+A job that fails in `VALIDATING` reports the reason in its `error` field. Common causes are
+malformed JSONL, an empty file, a model that isn't available for batch, and an input file that
+mixes models.
 
 ## Workflow
 
@@ -254,6 +259,7 @@ discount does not apply to dedicated usage. Source:
 | Max requests per batch | 50,000 |
 | Max file size | 100MB |
 | Max tokens enqueued per model | 30B |
+| Models per batch job | 1 (every line's `body.model` must match) |
 | Recommended batch size | 1,000-10,000 |
 
 Batch API rate limits are separate from standard per-model rate limits.
@@ -271,6 +277,8 @@ Per-request errors are recorded in a separate file accessible via `error_file_id
 
 - Aim for 1,000-10,000 requests per batch unless you have a strong reason to go smaller or larger
 - Validate JSONL before submission to avoid wasting a full batch run on malformed input
+- Use one model per batch job; to run the same prompts through several models, prepare one input
+  file per model and submit each as its own batch job
 - Use unique `custom_id` values so output and error rows can be reconciled deterministically
 - Poll status every 30-60 seconds rather than tight-looping the API
 - Small batches (under 1K requests) typically complete in minutes; most batches finish within 24 hours; allow up to 72 hours for very large or complex runs
