@@ -217,6 +217,7 @@ For preference fine-tuning with function calling, the `tools` field goes inside 
 - Images must be base64 encoded with MIME prefix
 - Max 10 images per example, 10MB each
 - Formats: PNG, JPEG, WEBP
+- Aspect ratio at most 200:1 (longest side / shortest side); wider or taller images reject the file at upload
 - Only user messages can contain images
 
 ## VLM Instruction Format
