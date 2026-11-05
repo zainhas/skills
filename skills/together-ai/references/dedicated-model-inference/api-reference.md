@@ -379,10 +379,20 @@ deployment).
 ## Monitoring
 
 DMI records latency, throughput, replica-count, and utilization metrics for every endpoint
-and deployment — the same series that drive autoscaling. Three surfaces:
+and deployment — the same series that drive autoscaling. Four surfaces:
 
-- **Analytics dashboard** — `https://api.together.ai/endpoints` shows per-endpoint charts.
-  Use it to monitor at a glance and to compare deployments during a cutover or A/B test.
+- **Analytics dashboard** — console **Analytics** tab at `https://api.together.ai/endpoints`
+  (Usage / Errors, Total or By deployment). Glanceable charts; compare deployments during a
+  cutover or A/B test.
+- **Hosted Grafana** — Together AI automatically creates and hosts a Grafana instance for each
+  project with an active deployment. Prebuilt dashboard covers every endpoint in the project
+  with request-path layers (edge / router / worker), queueing overhead, and KV-cache panels
+  that the Analytics tab does not show. Open via **Open Grafana** at the top of the Endpoints
+  page (all endpoints) or an endpoint page (that endpoint only); anyone who can view the
+  project can open it once the instance is ready. Sign-in is **viewer-only** (no edits, saved
+  copies, or new dashboards). Together AI deletes the instance 30 days after the project's
+  last deployment stops. Customize, alert, or co-chart with app metrics by scraping the
+  Prometheus endpoint into your own Grafana (same cookbook dashboard JSON).
 - **Events feed** — the audit trail of lifecycle changes (below).
 - **Prometheus-compatible metrics endpoint** (beta) — org-scoped scrape target for your own
   Prometheus/Grafana/Datadog stack (below).
@@ -413,6 +423,11 @@ router (`router_inference_request_duration_seconds`, `router_inference_ttft_seco
 include `endpoint_id`/`endpoint_name`,
 `deployment_id`/`deployment_name`, `replica_id`, `model`, `status_code`, `is_streaming`, and
 `token_type`.
+
+Dashboard JSON (Grafana 10.2+) lives at
+`togethercomputer/together-cookbook/.../dedicated-endpoints/Grafana_Dedicated_Endpoints/`.
+A common alert is 5xx edge error ratio above 0.05 for five minutes
+(`edge_inference_requests_total{status_code=~"5.."}` over all requests).
 
 ## Events Feed
 

@@ -85,8 +85,10 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
   rejected. `0/0` stops; on a running deployment the floor is otherwise `1`.
 - **Autoscaling metric names are their own catalog** (`gpu_utilization`, `inflight_requests`,
   `ttft`, ...) — raw Prometheus series names are rejected in scaling policies. Charts live in
-  the dashboard (`https://api.together.ai/endpoints`); raw series can be scraped from the
-  org-scoped Prometheus-compatible metrics endpoint (beta — see api-reference.md).
+  the console Analytics tab and in the **hosted Grafana** Together AI creates per project with
+  an active deployment (**Open Grafana** on `https://api.together.ai/endpoints`); raw series
+  can be scraped from the org-scoped Prometheus-compatible metrics endpoint (beta — see
+  api-reference.md) into your own Grafana when you need edits or alerts.
 - **Deletion order matters:** stop the deployment (wait for `STOPPED`), delete it, then
   delete the endpoint. The CLI's `rm` smart-deletes by ID prefix and auto-detaches from the
   split. Deleting still requires a stopped deployment, but `rm` now scales down for you:
@@ -133,7 +135,7 @@ only for the detail named in its row, and read just that section; each starts wi
 | [scripts/dedicated-model-inference/deploy_model.py](scripts/dedicated-model-inference/deploy_model.py) | 254 | SDK path: deploy, poll to READY, infer on the dedicated base URL, scale, clean up | scripting the lifecycle in Python |
 | [scripts/dedicated-model-inference/upload_custom_model.py](scripts/dedicated-model-inference/upload_custom_model.py) | 145 | upload custom weights or a LoRA adapter, then deploy | serving your own weights |
 | [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
-| [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
+| [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 493 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, hosted Grafana and Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
 | [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
 | [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
 
@@ -142,6 +144,8 @@ only for the detail named in its row, and read just that section; each starts wi
 - [Dedicated Model Inference overview](https://docs.together.ai/docs/dedicated-endpoints/overview)
 - [Quickstart](https://docs.together.ai/docs/dedicated-endpoints/quickstart)
 - [Concepts](https://docs.together.ai/docs/dedicated-endpoints/concepts)
+- [Metrics and dashboards](https://docs.together.ai/docs/dedicated-endpoints/monitoring)
+- [Run your own Grafana](https://docs.together.ai/docs/dedicated-endpoints/grafana)
 - [CLI reference: beta endpoints](https://docs.together.ai/reference/cli/endpoints-beta)
 - [CLI reference: beta models](https://docs.together.ai/reference/cli/models-beta)
 - [Migrate from v1](https://docs.together.ai/docs/dedicated-endpoints/migrate-from-v1)
