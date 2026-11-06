@@ -55,6 +55,7 @@ structured outputs are supported.
 | Qwen | Qwen3.8 Flash | `Qwen/Qwen3.8-Flash` | 1,000,000 | 0.09 / 0.282 | - | - |
 | Meta | Muse Glimmer 30B | `meta-models/Muse-Glimmer-30B` | 131,072 | 0.35 / 1.50 | - | - |
 | Prism ML | Ternary Bonsai 27B | `Prism-ML/Ternary-Bonsai-27B` | 262,144 | free | - | - |
+| Ricursive | Ripple 65B Preview | `ricursive-ai/Ripple-65B-Preview` | 131,072 | 0.20 / 0.60 | - | - |
 | Together AI | Tev1 4B Experimental | `together/Tev1-4B-experimental` | 32,768 | 0.042 / free | - | - |
 
 ## Vision Models (serverless)
