@@ -32,9 +32,10 @@
 
 ### Kubernetes Access
 
+**Admin kubeconfig** (contains credentials; full control):
+
 ```shell
-# Get credentials
-together beta clusters get-credentials <CLUSTER_ID>
+tg beta clusters get-credentials <CLUSTER_ID>
 export KUBECONFIG=$HOME/.kube/config
 
 # Verify
@@ -42,6 +43,34 @@ kubectl get nodes
 kubectl top nodes
 kubectl get pods --all-namespaces
 ```
+
+**OIDC kubeconfig** (per-user browser sign-in; no secrets; safe to share inside the project):
+
+Two OIDC modes. Recognize them from the cluster console:
+
+| Mode | Issuer / Quick setup | Local plugin |
+|------|----------------------|--------------|
+| **Together-managed** | Issuer `https://dex.<LOCATION>.cloud.together.ai/t-<CLUSTER_ID>`; Quick setup installs `kubelogin` | [int128/kubelogin](https://github.com/int128/kubelogin) (`brew install kubelogin` or `kubectl krew install oidc-login`) |
+| **Customer IdP** | Your org's IdP (Google, Okta, Auth0, Entra ID); Quick setup shows `together-login` | `together-login` from [together-kubelogin releases](https://github.com/togethercomputer/together-kubelogin/releases/latest) |
+
+On Together-managed OIDC, project collaborators sign in with their Together account. Save the console **OIDC Kubeconfig** to `$HOME/.kube/oidc-config.yaml`, then:
+
+```shell
+kubectl --kubeconfig=$HOME/.kube/oidc-config.yaml get pods
+```
+
+Default RBAC (bindings `ums-oidc-admin` / `ums-oidc-member`, created once; Together does not overwrite later edits):
+
+| Project role | Kubernetes group | ClusterRole | Notes |
+|--------------|------------------|-------------|-------|
+| admin | `proj:<PROJECT_ID>:admin` | `cluster-admin` | Full control |
+| editor | `proj:<PROJECT_ID>:member` | `view` | No Secrets, `kubectl exec`, or nodes (`get nodes` → 403) |
+
+Kubernetes username is the collaborator's email. Tokens cache under `$HOME/.kube/cache/oidc-login/` for up to 24 hours; `kubectl oidc-login clean` forces re-sign-in after a role change. Removing someone from the project blocks new sign-in; an existing token keeps working until it expires. Grant more access with standard RoleBindings on a user email or the `proj:<PROJECT_ID>:member` group.
+
+Customer-IdP setup (issuer URL, client, claims, manual RBAC) is documented at
+[Set up OIDC authentication](https://docs.together.ai/docs/cluster-oidc). Together-managed walkthrough:
+[Sign in to clusters with your Together account](https://docs.together.ai/docs/cluster-together-oidc).
 
 ### Kubernetes Dashboard
 
@@ -55,7 +84,7 @@ kubectl -n kubernetes-dashboard get secret \
 
 ### SSH Access
 
-Two SSH methods are supported. On Slurm clusters with OIDC enabled, pick one from the **SSH access method** selector in the cluster UI sidebar; the choice applies to the head node and all compute nodes. If OIDC is not configured on the cluster, only key-based SSH is available.
+Two SSH methods are supported. On Slurm clusters with OIDC enabled, pick one from the **SSH access method** selector in the cluster UI sidebar; the choice applies to the head node and all compute nodes. If OIDC is not configured on the cluster, only key-based SSH is available. On Together-managed OIDC clusters that support OIDC SSH, `tg beta clusters ssh` uses the same Together sign-in (no SSH key); a certificate already issued keeps working until it expires after the user is removed from the project.
 
 | Method | How it works | Requirements |
 |--------|--------------|--------------|
@@ -500,23 +529,25 @@ scontrol show job <jobid>
 
 ### Roles
 
-| Role | Control Plane | Data Plane |
+| Project role | Control Plane | Data Plane (Together-managed OIDC defaults) |
 |------|--------------|------------|
-| **Admin** | Full write (create/delete/scale clusters and volumes) | Full SSH and kubectl |
-| **Member** | Read-only (view only) | SSH and kubectl access |
+| **Admin** | Full write (create/delete/scale clusters and volumes) | Kubernetes `cluster-admin` via `proj:<PROJECT_ID>:admin`; full SSH/kubectl |
+| **Editor** (member group) | Project collaborator (non-admin) | Kubernetes `view` via `proj:<PROJECT_ID>:member` (no Secrets, exec, or nodes); SSH/kubectl via OIDC when enabled |
 
-Only admins can add or remove users. Member permissions for in-cluster operations may vary
-based on RBAC configuration.
+Only project admins can add or remove collaborators. On customer-IdP OIDC clusters, in-cluster
+permissions come from the RBAC bindings you create, not from these defaults.
 
 ### Managing Users
 
-1. Navigate to Settings -> GPU Cluster Projects -> View Project
-2. Add User (email) or Remove User
-3. New users default to Member role; admins can promote afterward
+1. Navigate to Settings -> Project -> Collaborators (or the cluster project's collaborator list)
+2. Add or remove a collaborator by email
+3. New collaborators default to editor; admins can promote afterward
 
-Access is always project-wide -- all clusters in a project share the same access list.
+Access is always project-wide -- all clusters in a project share the same collaborator list.
 
-Users require active Together AI accounts before they can be added.
+Users require active Together AI accounts before they can be added. After removal from the
+project, Together-managed OIDC sign-in and new OIDC SSH certificates fail; tokens or
+certificates already issued remain valid until they expire (up to 24 hours for kubectl tokens).
 
 ## Billing
 
