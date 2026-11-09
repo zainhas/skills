@@ -210,15 +210,20 @@ wins for low or bursty traffic where a dedicated replica would idle.
 
 Serve your own fine-tuned weights. Requirements:
 
-- **Source**: your local machine (CLI upload), Hugging Face Hub, or an S3 presigned URL.
+- **Source**: your local machine (CLI upload), or a remote upload via `--from` /
+  `remote_url`. Accepted remote sources: a Hugging Face repo ID (`org/name`, optional
+  `@revision`), a Hugging Face repo URL (`https://huggingface.co/org/name`), or a
+  presigned `https://` URL on Amazon S3, Google Cloud Storage, or Cloudflare R2.
+  Other sources (`s3://` paths, `http://` URLs, bare IP addresses) are rejected before
+  the upload starts.
 - **Architecture**: a fine-tuned variant of a base model Together supports for dedicated
   inference — uploads cannot introduce new architectures.
 - **Type**: text generation.
 - **Format**: standard Hugging Face repo layout compatible with `from_pretrained`
   (`config.json`, `*.safetensors`, `tokenizer.json`, ...).
-- **S3 archives**: a single `.zip` / `.tar.gz` with the files at the **archive root** (no
-  nested top-level directory); presigned URL valid for at least 100 minutes.
-  From inside the model dir: `tar -czvf ../model.tar.gz .`
+- **Cloud archives** (S3 / GCS / R2): a single `.zip` / `.tar.gz` with the files at the
+  **archive root** (no nested top-level directory); presigned URL valid for at least
+  100 minutes. From inside the model dir: `tar -czvf ../model.tar.gz .`
 
 Meeting these is necessary but not sufficient: an unsupported base model, layer type, or
 adapter rank is rejected with an error identifying the problem at create or upload time.
@@ -256,8 +261,8 @@ Local directory (CLI handles the multipart upload):
 tg beta models upload ml_abc123 ./path/to/model-dir
 ```
 
-Remote (server-side streaming from Hugging Face or presigned S3 URL; `--token` for gated or
-private HF repos):
+Remote (server-side streaming from an accepted source above; `--token` for gated or
+private HF repos; a presigned URL needs no token):
 
 ```bash
 tg beta models remote-uploads create ml_abc123 \
@@ -351,8 +356,12 @@ longer change a record's base model.
 - **"Model name already exists"** — names are unique; pick a new one (no versioning).
 - **Missing required files** — adapters need both `adapter_config.json` and
   `adapter_model.safetensors` at the source root.
-- **Job stuck in `Processing`** — the source usually can't be reached: expired presigned URL,
-  or HF token lacking repo access.
-- **`401`/`403`** — check `TOGETHER_API_KEY`, HF token permissions, and presigned URL expiry.
+- **`remote_url must be a Hugging Face repo ... or an https URL on Amazon S3, Google Cloud
+  Storage, or Cloudflare R2`** — `--from` / `remote_url` isn't an accepted source. For an
+  `s3://bucket/key` path, pass a presigned `https://` URL for the same object instead.
+- **Job stuck in `Processing`** — the source usually can't be reached: expired
+  presigned URL, or HF token lacking repo access.
+- **`401`/`403`** — check `TOGETHER_API_KEY`, HF token permissions, and
+  presigned URL expiry.
 - **Doubled slug in the catalog** (`your-project/google/gemma...`) — the record was created
   with an org-prefixed name; delete and re-create with the bare name.

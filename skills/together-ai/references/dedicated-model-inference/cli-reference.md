@@ -57,7 +57,7 @@ tg beta models
   ls-revisions    List revisions for a model
   download        Download model/adapter files to a local directory
   update / rm     Update or delete a model record (rm was previously `delete`)
-  remote-uploads  create | retrieve | list  (import from Hugging Face or presigned URL)
+  remote-uploads  create | retrieve | list  (HF repo ID/URL or presigned S3/GCS/R2 https URL)
 ```
 
 ## endpoints deploy
@@ -259,7 +259,8 @@ tg beta models create gemma-4-31b-it --base-model ml_CbJNwQC2ZqCU2iFT3mrCh
 tg beta models upload ml_abc123 ./path/to/model-dir
 tg beta models upload ml_abc123 ./path/to/adapter-dir --type adapter
 
-# Import from Hugging Face or a presigned S3 URL (server-side streaming)
+# Import from HF (repo ID/URL) or a presigned https URL on S3/GCS/R2 (server-side)
+# Other sources (s3://, http://, IP) are rejected; --token only for gated/private HF
 tg beta models remote-uploads create ml_abc123 \
   --from https://huggingface.co/your-org/your-repo --token hf_your_token
 tg beta models remote-uploads retrieve job_abc123
@@ -281,7 +282,7 @@ tg beta models rm ml_abc123
 singular `model` / `adapter` (default `model`); **read** commands (`ls-files`,
 `remote-uploads retrieve` / `list`) take plural `models` / `adapters` (default `models`).
 
-Full upload flows (requirements, S3 archive format, polling, deploying the result) are in
+Full upload flows (requirements, cloud archive format, polling, deploying the result) are in
 [models-and-configs.md](models-and-configs.md).
 
 ## What the CLI can't do

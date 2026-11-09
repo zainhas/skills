@@ -2,8 +2,8 @@
 """
 Together AI Dedicated Model Inference -- Upload and Deploy a Custom Model or LoRA Adapter
 
-Register a model record, import weights from Hugging Face or a presigned S3
-URL, poll the upload job, and deploy the result on a dedicated endpoint.
+Register a model record, import weights from Hugging Face or a presigned
+https URL on S3/GCS/R2, poll the upload job, and deploy the result.
 
 Usage:
     python upload_custom_model.py create --name gemma-4-31b-it --base-model ml_base123 [--adapter]
@@ -22,8 +22,11 @@ Upload requirements:
       layer types, or adapter ranks are rejected at create/upload time.
     - Hugging Face repo layout compatible with from_pretrained; adapters need
       adapter_config.json + adapter_model.safetensors.
-    - S3 sources: one .zip/.tar.gz archive with files at the archive ROOT, and a
-      presigned URL valid for at least 100 minutes.
+    - Remote sources: HF repo ID (org/name[@revision]) or https://huggingface.co/
+      URL, or a presigned https:// URL on Amazon S3, GCS, or Cloudflare R2.
+      s3:// paths, http:// URLs, and IP addresses are rejected.
+    - Cloud archives (S3/GCS/R2): one .zip/.tar.gz with files at the archive ROOT,
+      and a presigned URL valid for at least 100 minutes.
     - Name records bare (gemma-4-31b-it), never org-prefixed (google/gemma-4-31b-it):
       the platform prepends your project slug, and a doubled name can't be renamed.
 """
@@ -57,7 +60,7 @@ def create_record(name: str, base_model_id: str, adapter: bool, description: str
 
 
 def start_remote_upload(model_id: str, remote_url: str, hf_token: str | None):
-    """Stream weights server-side from Hugging Face or a presigned S3 URL."""
+    """Stream weights server-side from an accepted HF or S3/GCS/R2 https source."""
     job = client.beta.models.remote_uploads.create(
         project_id=PROJECT_ID,
         model_id=model_id,
@@ -115,9 +118,9 @@ def main() -> int:
     p.add_argument("--description", default=None)
     p.add_argument("--adapter", action="store_true", help="Register a LoRA adapter instead of a full model")
 
-    p = sub.add_parser("upload", help="Start a remote upload from HF or presigned S3 URL")
+    p = sub.add_parser("upload", help="Start a remote upload from HF or S3/GCS/R2 https URL")
     p.add_argument("--model", required=True, help="Model record ID (ml_...)")
-    p.add_argument("--from-url", required=True, help="HF repo URL or presigned S3 archive URL")
+    p.add_argument("--from-url", required=True, help="HF repo ID/URL or presigned S3/GCS/R2 https URL")
     p.add_argument("--hf-token", default=None, help="Token for gated/private HF repos")
 
     p = sub.add_parser("poll", help="Poll an upload job until it succeeds")
