@@ -85,7 +85,6 @@ name/ID (adds a deployment to it).
 | `--placement` | — | Placement profile ID to use. |
 | `--placement.regions` | — | Comma-separated inline placement regions (mutually exclusive with `--placement`). |
 | `--placement.constraint` | — | `required` or `preferred` — how strictly to enforce inline placement regions. |
-| `--placement.hipaa` | off | Require HIPAA-eligible placement. |
 | `--inactive-timeout` | off | Minutes without requests before the deployment stops itself (30–1440; `0` disables). |
 
 Without `--inactive-timeout`, a deployment runs and bills until you stop it. The scale-to-zero
