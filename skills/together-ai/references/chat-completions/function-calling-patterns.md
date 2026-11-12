@@ -835,6 +835,7 @@ Serverless models that support this as of 2026-10-07, per the [serverless catalo
 - `deepseek-ai/DeepSeek-V4-Flash-0731`
 - `deepseek-ai/DeepSeek-V4.1-Flash`
 - `thinkingmachines/Inkling`
+- `thinkingmachines/Inkling-2-Small`
 - `MiniMaxAI/MiniMax-M3`
 - `Qwen/Qwen3.5-9B`
 - `openai/gpt-oss-120b`

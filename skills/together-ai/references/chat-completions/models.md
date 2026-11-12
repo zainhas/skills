@@ -44,6 +44,7 @@ structured outputs are supported.
 | DeepSeek | DeepSeek V4 Flash 0731 | `deepseek-ai/DeepSeek-V4-Flash-0731` | 1,048,576 | 0.14 / 0.28 | Yes | Yes |
 | DeepSeek | DeepSeek V4.1 Flash | `deepseek-ai/DeepSeek-V4.1-Flash` | 1,000,000 | 0.30 / 1.20 | Yes | Yes |
 | Thinking Machines | Inkling | `thinkingmachines/Inkling` | 524,288 | 1.00 / 4.05 | Yes | Yes |
+| Thinking Machines | Inkling 2 Small | `thinkingmachines/Inkling-2-Small` | 1,048,576 | 0.30 / 1.00 | Yes | Yes |
 | MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 | 0.30 / 1.20 | Yes | Yes |
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 | 0.17 / 0.25 | Yes | Yes |
 | OpenAI | GPT-OSS 120B | `openai/gpt-oss-120b` | 131,072 | 0.15 / 0.60 | Yes | Yes |
@@ -64,6 +65,7 @@ structured outputs are supported.
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 |
 | MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 |
 | Moonshot | Kimi K3 | `moonshotai/Kimi-K3` | 1,048,576 |
+| Thinking Machines | Inkling 2 Small | `thinkingmachines/Inkling-2-Small` | 1,048,576 |
 
 Start with `Qwen/Qwen3.5-9B` unless the task needs a larger model.
 
