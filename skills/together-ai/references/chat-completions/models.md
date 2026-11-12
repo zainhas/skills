@@ -43,6 +43,7 @@ structured outputs are supported.
 | DeepSeek | DeepSeek V4 Pro 0813 | `deepseek-ai/DeepSeek-V4-Pro-0813` | 1,048,576 | 1.32 / 3.96 | Yes | Yes |
 | DeepSeek | DeepSeek V4 Flash 0731 | `deepseek-ai/DeepSeek-V4-Flash-0731` | 1,048,576 | 0.14 / 0.28 | Yes | Yes |
 | DeepSeek | DeepSeek V4.1 Flash | `deepseek-ai/DeepSeek-V4.1-Flash` | 1,000,000 | 0.30 / 1.20 | Yes | Yes |
+| Elorian Labs | Glimpse 1.0 | `elorian-labs/glimpse-1.0` | 262,144 | 0.60 / 3.00 | Yes | Yes |
 | Thinking Machines | Inkling | `thinkingmachines/Inkling` | 524,288 | 1.00 / 4.05 | Yes | Yes |
 | MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 | 0.30 / 1.20 | Yes | Yes |
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 | 0.17 / 0.25 | Yes | Yes |
