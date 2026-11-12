@@ -7,6 +7,7 @@
   - [Startup Scripts (Slinky v1.0 only)](#startup-scripts-slinky-v10-only)
 - [GPU Access in Containers](#gpu-access-in-containers)
 - [Scaling](#scaling)
+- [Preemptible compute](#preemptible-compute)
 - [Storage](#storage)
 - [Health Checks](#health-checks)
 - [User Management](#user-management)
@@ -251,6 +252,17 @@ sudo scontrol update NodeName=<node_name> State=drain Reason="scaling down"
 ### Combining Capacity
 
 Use reserved for baseline + on-demand for bursts.
+
+## Preemptible compute
+
+When Together reclaims a preemptible Kubernetes node, pods receive SIGTERM and the node is removed at most five minutes later.
+
+| Pod setting | Grace window after SIGTERM |
+|-------------|----------------------------|
+| `terminationGracePeriodSeconds` set | Up to that value, capped at 300 seconds |
+| `terminationGracePeriodSeconds` omitted | Kubernetes default of **30 seconds** |
+
+The node is reclaimed as soon as pods exit, so checkpoint and exit promptly. Set `terminationGracePeriodSeconds` (for example `300`) when the workload needs more than 30 seconds to checkpoint. Details: [Preemptible compute](https://docs.together.ai/docs/preemptible-compute).
 
 ## Storage
 

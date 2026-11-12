@@ -40,6 +40,7 @@ gang scheduling on a running cluster is `domains/kueue.md` or `domains/volcano.m
 - The API requires `cuda_version` and `nvidia_driver_version` as separate fields in addition to the combined `driver_version` string. Pass them via `extra_body` in the Python SDK.
 - Credentials retrieval is part of provisioning. Do not stop at cluster creation if the user needs to run workloads immediately.
 - Slurm startup scripts (worker/login init, worker/controller prolog and epilog, extra `slurm.conf`) are **Slinky v1.0 only**. A non-zero exit from a worker prolog or epilog drains the node, and calling Slurm commands (`squeue`, `scontrol`, `sacctmgr`) inside any prolog/epilog can deadlock the scheduler.
+- On preemptible Kubernetes nodes, pods that set `terminationGracePeriodSeconds` get up to that window (capped at 300 seconds) after SIGTERM; pods that omit it get the Kubernetes default of **30 seconds**. The node is still removed at T+5:00 regardless.
 
 ## Open next
 
@@ -54,12 +55,13 @@ read just that section; long ones start with `## Contents`.
 | [scripts/gpu-clusters/manage_storage.py](scripts/gpu-clusters/manage_storage.py) | 129 | create, list, resize, delete shared volumes | managing storage on its own |
 | [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 305 | `tg` cluster and storage commands, global flags, instance types, driver versions | a CLI flag or driver version |
 | [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 478 | cluster and storage endpoints, request fields, regions, instance types | an API field the script does not set |
-| [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 571 | architecture, access, Slurm config, GPU containers, scaling, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
+| [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 583 | architecture, access, Slurm config, GPU containers, scaling, preemptible grace period, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
 
 ## Docs
 
 - [GPU Clusters Overview](https://docs.together.ai/docs/gpu-clusters-overview)
 - [GPU Clusters Quickstart](https://docs.together.ai/docs/gpu-clusters-quickstart)
+- [Preemptible compute](https://docs.together.ai/docs/preemptible-compute)
 - [Clusters API](https://docs.together.ai/reference/clusters-create)
 - [GPU Cluster Pricing](https://www.together.ai/pricing#gpu-clusters)
 - [Slurm Startup Scripts](https://docs.together.ai/docs/slurm-startup-scripts)
