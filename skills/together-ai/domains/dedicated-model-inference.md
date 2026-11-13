@@ -133,7 +133,7 @@ only for the detail named in its row, and read just that section; each starts wi
 | [scripts/dedicated-model-inference/deploy_model.py](scripts/dedicated-model-inference/deploy_model.py) | 254 | SDK path: deploy, poll to READY, infer on the dedicated base URL, scale, clean up | scripting the lifecycle in Python |
 | [scripts/dedicated-model-inference/upload_custom_model.py](scripts/dedicated-model-inference/upload_custom_model.py) | 145 | upload custom weights or a LoRA adapter, then deploy | serving your own weights |
 | [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
-| [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
+| [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 501 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus `_rate5m` monitoring, Events Feed | SDK calls, metrics, or the events feed |
 | [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
 | [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
 
@@ -142,6 +142,8 @@ only for the detail named in its row, and read just that section; each starts wi
 - [Dedicated Model Inference overview](https://docs.together.ai/docs/dedicated-endpoints/overview)
 - [Quickstart](https://docs.together.ai/docs/dedicated-endpoints/quickstart)
 - [Concepts](https://docs.together.ai/docs/dedicated-endpoints/concepts)
+- [Monitor endpoints](https://docs.together.ai/docs/dedicated-endpoints/monitoring)
+- [Run your own Grafana](https://docs.together.ai/docs/dedicated-endpoints/grafana)
 - [CLI reference: beta endpoints](https://docs.together.ai/reference/cli/endpoints-beta)
 - [CLI reference: beta models](https://docs.together.ai/reference/cli/models-beta)
 - [Migrate from v1](https://docs.together.ai/docs/dedicated-endpoints/migrate-from-v1)

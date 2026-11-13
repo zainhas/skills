@@ -401,18 +401,41 @@ curl -H "Authorization: Bearer $TOGETHER_API_KEY" \
 ```
 
 Works with any Prometheus-compatible scraper (set `metrics_path:
-/organizations/<ORG_ID>/metrics`, target `o11y-de2-metrics.cloud.together.ai`, bearer
-credentials). Series are grouped by request-path stage — edge (`edge_inference_requests_total`,
-`edge_inference_request_duration_ms`, `edge_inference_ttft_ms`, `edge_inference_inflight_requests`),
-router (`router_inference_request_duration_seconds`, `router_inference_ttft_seconds`,
-`router_pre_worker_duration_seconds`, `router_token_count`, ...), and worker
-(`worker_ttft_seconds`, `worker_generation_duration_seconds`, `worker_tpot_seconds`,
-`worker_token_total`, plus two engine-cache gauges — `worker_engine_kv_cache_utilization`
-(fraction of the engine's KV-cache capacity in use, 0–1) and `worker_engine_cache_hit_rate`
-(engine KV-cache hit rate, 0–1; higher means more prefix reuse across requests), ...). Labels
-include `endpoint_id`/`endpoint_name`,
-`deployment_id`/`deployment_name`, `replica_id`, `model`, `status_code`, `is_streaming`, and
-`token_type`.
+/organizations/$ORG_ID/metrics`, target `o11y-de2-metrics.cloud.together.ai`, bearer
+credentials).
+
+Most request, token, and latency series end in `_rate5m`: Together AI precomputes them as
+per-second rates over the last 5 minutes and exposes them as gauges, so chart them directly
+without wrapping in `rate()`. Rate histograms expose `_rate5m_bucket` / `_sum` / `_count`
+(pass `_bucket` to `histogram_quantile()`). Counters still end in `_total` (wrap in `rate()`);
+gauges are point-in-time.
+
+Series by request-path stage:
+
+- **Edge:** `edge_inference_requests_rate5m`, `edge_inference_request_duration_ms_rate5m`,
+  `edge_inference_ttft_ms_rate5m`, `edge_inference_inflight_requests`
+- **Router:** `router_inference_requests_rate5m`,
+  `router_inference_request_duration_seconds_rate5m`, `router_inference_ttft_seconds_rate5m`,
+  `router_pre_worker_duration_seconds_rate5m`, `router_inference_inflight_requests`,
+  `router_token_rate5m`, `router_tokens_per_request_rate5m`
+- **Worker:** `worker_inference_request_total` (counter), `worker_ttft_seconds_rate5m`,
+  `worker_generation_duration_seconds_rate5m`, `worker_tpot_seconds_rate5m`,
+  `worker_token_rate5m`, `worker_tokens_per_request_rate5m`, plus engine-cache gauges
+  `worker_engine_kv_cache_utilization` and `worker_engine_cache_hit_rate` (0–1)
+
+The older counters/histograms (`edge_inference_requests_total`, duration/TTFT/token series
+without `_rate5m`, `router_token_count`, `worker_token_total`, ...) are **deprecated** —
+replica restarts reset them so `rate()` spikes falsely. Migrate by switching to the `_rate5m`
+name and dropping `rate()`; for histograms insert `_rate5m` before `_bucket`/`_sum`/`_count`.
+Example: `sum(edge_inference_requests_rate5m{status_code=~"5.."})` replaces
+`sum(rate(edge_inference_requests_total{status_code=~"5.."}[5m]))`. Replacements keep the same
+labels except router histograms gain `replica_id` and edge `_rate5m` series drop
+`deployment_region`.
+
+Labels include `endpoint_id`/`endpoint_name`, `deployment_id`/`deployment_name`, `replica_id`,
+`model`/`model_id`, `status_code`, `is_streaming`, and `token_type`. Hosted Grafana and the
+example cookbook dashboard query the `_rate5m` series; re-import if you still chart the
+deprecated names.
 
 ## Events Feed
 
