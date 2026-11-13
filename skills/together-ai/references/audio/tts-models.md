@@ -18,6 +18,7 @@ These models are current in the latest text-to-speech guide and are not listed i
 |-------|-----------|--------|-----------|-----------------|
 | Orpheus 3B | `canopylabs/orpheus-3b-0.1-ft` | Serverless | REST, Streaming, WebSocket | $15 per 1M characters |
 | Kokoro | `hexgrad/Kokoro-82M` | Serverless | REST, Streaming, WebSocket | $4 per 1M characters |
+| Qwen3 TTS 12Hz 1.7B | `Qwen/Qwen3-TTS-12Hz-1.7B` | Serverless | REST | $20 per 1M characters |
 | Cartesia Sonic 3 | `cartesia/sonic-3` | Serverless / Dedicated / Reserved | REST | Build Tier 2+ |
 | Cartesia Sonic 2 | `cartesia/sonic-2` | Serverless / Dedicated / Reserved | REST | $65 per 1M characters, Build Tier 2+ |
 | Cartesia Sonic | `cartesia/sonic` | Serverless | REST | Listed in `/audio/speech` reference enum |
