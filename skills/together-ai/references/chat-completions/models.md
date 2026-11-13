@@ -17,7 +17,7 @@ Source pages: [Serverless models](https://docs.together.ai/docs/serverless/model
 
 | Use Case | Model | API String | Alternatives |
 |----------|-------|-----------|-------------|
-| Chat | Kimi K3 | `moonshotai/Kimi-K3` | `zai-org/GLM-5.3`, `Qwen/Qwen3.8-2.4T-A95B` |
+| Chat | Kimi K3 | `moonshotai/Kimi-K3` | `zai-org/GLM-5.3`, `Qwen/Qwen3.7-Max` |
 | Reasoning | Kimi K3 | `moonshotai/Kimi-K3` | `deepseek-ai/DeepSeek-V4-Pro-0813`, `zai-org/GLM-5.3` |
 | Coding agents | GLM-5.3 | `zai-org/GLM-5.3` | `moonshotai/Kimi-K3`, `deepseek-ai/DeepSeek-V4-Flash-0731` |
 | Small and fast | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | `Qwen/Qwen3.8-Flash` |
@@ -44,11 +44,10 @@ structured outputs are supported.
 | DeepSeek | DeepSeek V4 Flash 0731 | `deepseek-ai/DeepSeek-V4-Flash-0731` | 1,048,576 | 0.14 / 0.28 | Yes | Yes |
 | DeepSeek | DeepSeek V4.1 Flash | `deepseek-ai/DeepSeek-V4.1-Flash` | 1,000,000 | 0.30 / 1.20 | Yes | Yes |
 | Thinking Machines | Inkling | `thinkingmachines/Inkling` | 524,288 | 1.00 / 4.05 | Yes | Yes |
-| MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 | 0.30 / 1.20 | Yes | Yes |
+| MiniMax | MiniMax M3.1 Flash | `MiniMaxAI/MiniMax-M3.1-Flash` | 1,048,576 | 0.15 / 0.60 | Yes | Yes |
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 | 0.17 / 0.25 | Yes | Yes |
 | OpenAI | GPT-OSS 120B | `openai/gpt-oss-120b` | 131,072 | 0.15 / 0.60 | Yes | Yes |
 | Meta | Llama 3.3 70B Instruct Turbo | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | 131,072 | 1.04 / 1.04 | Yes | Yes |
-| Qwen | Qwen3.8 2.4T A95B | `Qwen/Qwen3.8-2.4T-A95B` | - | 2.00 / 6.00 | - | - |
 | Qwen | Qwen3.7 Max | `Qwen/Qwen3.7-Max` | - | 1.50 / 4.50 | - | - |
 | Qwen | Qwen3.7 Plus | `Qwen/Qwen3.7-Plus` | 1,000,000 | 0.32 / 1.28 | - | - |
 | Qwen | Qwen3.6 Plus | `Qwen/Qwen3.6-Plus` | 1,000,000 | 0.50 / 3.00 | - | - |
@@ -61,11 +60,13 @@ structured outputs are supported.
 
 | Organization | Model | API String | Context |
 |-------------|-------|-----------|---------|
+| Moonshot | Kimi K3.1 Pro | `moonshotai/Kimi-K3.1-Pro` | 1,048,576 |
+| NVIDIA | Nemotron 3.5 Super VL | `nvidia/NVIDIA-Nemotron-3.5-Super-VL` | 262,144 |
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 262,144 |
-| MiniMax | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | 524,288 |
 | Moonshot | Kimi K3 | `moonshotai/Kimi-K3` | 1,048,576 |
 
-Start with `Qwen/Qwen3.5-9B` unless the task needs a larger model.
+Recommended pick: `moonshotai/Kimi-K3.1-Pro` (alternatives:
+`nvidia/NVIDIA-Nemotron-3.5-Super-VL`, `Qwen/Qwen3.5-9B`).
 
 ## Moderation Models
 

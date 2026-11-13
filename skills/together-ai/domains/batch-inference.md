@@ -1,9 +1,9 @@
 # Together AI: Batch Inference
 
-Asynchronous bulk inference over a JSONL file, up to 50% cheaper than real-time, with a 24-hour
-completion window (batches under 1,000 requests usually finish in minutes; complex or busy models
-can occasionally run past 24 hours, so track status rather than wall-clock time). For requests a user is
-waiting on, use `domains/chat-completions.md` instead.
+Asynchronous bulk inference over a JSONL file against a separate rate limit pool, with 50% off on
+selected models and a 24-hour completion window (batches under 1,000 requests usually finish in
+minutes; complex or busy models can occasionally run past 24 hours, so track status rather than
+wall-clock time). For requests a user is waiting on, use `domains/chat-completions.md` instead.
 
 ## Workflow
 

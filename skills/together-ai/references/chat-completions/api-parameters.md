@@ -342,8 +342,10 @@ Multimodal content (vision models):
 
 ## OpenAI Compatibility
 
-Migrate from the OpenAI SDK by changing the base URL and API key while keeping the chat/completions
-shape the same:
+Migrate from the OpenAI SDK by changing the base URL and API key. Compatibility covers chat,
+completions, vision, image generation, text-to-speech, and speech-to-text. `embeddings.create` is
+dedicated-only (no serverless embedding models; deploy e.g. `BAAI/bge-base-en-v1.5` on a dedicated
+endpoint). Source: [OpenAI compatibility](https://docs.together.ai/docs/inference/openai-compatibility).
 
 ```python
 from openai import OpenAI
@@ -353,7 +355,7 @@ client = OpenAI(
     api_key="YOUR_TOGETHER_API_KEY",
 )
 response = client.chat.completions.create(
-    model="openai/gpt-oss-120b",
+    model="MiniMaxAI/MiniMax-M3.1-Flash",
     messages=[{"role": "user", "content": "Hello!"}],
 )
 print(response.choices[0].message.content)
