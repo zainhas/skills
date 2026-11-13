@@ -19,6 +19,7 @@ the runtime is genuinely custom; a standard model belongs on
 - Queue jobs are asynchronous; client code must poll and fetch results.
 - Deployments bill while running; scale down or delete what you create.
 - Parameterize deployment name, inputs, and resource sizing.
+- Secrets expire after 14 days by default (`--ttl` from `1d` to `14d`); renew before expiry or new replicas cannot read them.
 
 ## Open next
 
@@ -27,7 +28,7 @@ the runtime is genuinely custom; a standard model belongs on
 | [scripts/dedicated-containers/sprocket_hello_world.py](scripts/dedicated-containers/sprocket_hello_world.py) | 85 | minimal Sprocket worker | writing a worker |
 | [scripts/dedicated-containers/queue_client.py](scripts/dedicated-containers/queue_client.py) (.ts) | 109 | submit a job, poll, fetch the result | calling a deployed worker |
 | [references/dedicated-containers/sprocket-sdk.md](references/dedicated-containers/sprocket-sdk.md) | 189 | Sprocket base class, `run`, file outputs, HTTP endpoints, env vars | a worker API detail |
-| [references/dedicated-containers/jig-cli.md](references/dedicated-containers/jig-cli.md) | 526 | build, deploy, queue, secrets, volumes commands; `pyproject.toml` schema; full example | deploying or configuring |
+| [references/dedicated-containers/jig-cli.md](references/dedicated-containers/jig-cli.md) | 537 | build, deploy, queue, secrets, volumes commands; `pyproject.toml` schema; full example | deploying or configuring |
 
 ## Docs
 

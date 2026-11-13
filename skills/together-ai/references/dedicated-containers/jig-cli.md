@@ -279,6 +279,13 @@ curl https://api.together.ai/v1/deployment-request/my-deployment/health \
 
 Secrets are encrypted environment variables injected at runtime.
 
+Secrets expire. A secret lives for 14 days unless you pass `--ttl` to set a lifetime from `1d` to
+`14d`. Starting seven days before it expires, or halfway through a shorter lifetime, the project's
+admins and the secret's creator get a daily email reminder. When it expires, the secret is deleted,
+and new replicas of deployments that use it can't read it. Existing replicas keep using the value
+until they terminate. To keep it, set a new value or set it again with `--ttl`; either restarts the
+countdown.
+
 ### jig secrets set
 
 ```shell
@@ -290,6 +297,10 @@ together beta jig secrets set --name <name> --value <value> [flags]
 | `--name <name>` | Secret name (required) |
 | `--value <value>` | Secret value (required) |
 | `--description <text>` | Human-readable description |
+| `--ttl <days>` | Days until the secret expires and is deleted, from `1d` to `14d` (for example, `7d`). Defaults to `14d`. |
+
+`together beta jig deploy` warns about any secret the deployment uses that expires within seven days.
+To renew a secret, set a new value or set it again with `--ttl`; either restarts the countdown.
 
 Example:
 
