@@ -26,6 +26,7 @@
 
 | Organization | Model | API String | Context (SFT) |
 |-------------|-------|-----------|---------------|
+| NVIDIA | Nemotron 3.5 Super VL 120B A12B | `nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B` | 32K |
 | Qwen | Qwen3.5 397B A17B | `Qwen/Qwen3.5-397B-A17B` | 32K |
 | Qwen | Qwen3.5 122B A10B | `Qwen/Qwen3.5-122B-A10B` | 65K |
 | Moonshot | Kimi K2.5 | `moonshotai/Kimi-K2.5` | 32K |
@@ -58,6 +59,7 @@
 
 | Organization | Model | API String | Context (SFT) |
 |-------------|-------|-----------|---------------|
+| NVIDIA | Nemotron 3.5 Lightning 30B A3B | `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B` | 65K |
 | Qwen | Qwen3.5 27B | `Qwen/Qwen3.5-27B` | 32K |
 | Qwen | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | 65K |
 | Qwen | Qwen3.5 35B A3B | `Qwen/Qwen3.5-35B-A3B` | 65K |
@@ -151,6 +153,8 @@ Same models as LoRA, but batch sizes are generally smaller. Key full-fine-tuning
 
 | Organization | Model | API String |
 |-------------|-------|-----------|
+| NVIDIA | Nemotron 3.5 Super VL 120B A12B | `nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B` |
+| NVIDIA | Nemotron 3.5 Lightning 30B A3B | `nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B` |
 | Qwen | Qwen3.5 family | `Qwen/Qwen3.5-*` (0.8B, 2B, 4B, 9B, 27B, 35B-A3B, 122B-A10B, 397B-A17B) |
 | Qwen | Qwen3 0.6B - 235B | `Qwen/Qwen3-*` (all sizes and base variants) |
 | Qwen | Qwen3 30B A3B | `Qwen/Qwen3-30B-A3B` (and base) |
