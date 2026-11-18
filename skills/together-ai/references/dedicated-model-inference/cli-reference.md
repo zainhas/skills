@@ -13,6 +13,7 @@ and wires up the underlying resources.
 - [endpoints rm (smart delete)](#endpoints-rm-smart-delete)
 - [endpoints ab (A/B tests)](#endpoints-ab-ab-tests)
 - [endpoints shadow (shadow experiments)](#endpoints-shadow-shadow-experiments)
+- [endpoints rollout](#endpoints-rollout)
 - [models commands](#models-commands)
 - [What the CLI can't do](#what-the-cli-cant-do)
 
@@ -46,11 +47,15 @@ tg beta endpoints
   ab         Start an A/B test (creates the variant deployment)
   shadow     Start a shadow experiment (creates the shadow deployment)
 
+tg endpoints
+  rollout    Shift traffic from a source deployment to a target (canary / blue-green / rolling)
+
 tg beta models
   public          List platform-supported public models (the deployable catalog)
   list | ls       List models in your project (uploaded/fine-tuned)
   get <id>        Get a model
   configs <id>    List published configs for a model
+  configs get     Get a config revision by ID (`cr_...`) — also `tg models configs cr_...`
   create          Register a custom model/adapter record
   upload          Upload local weights to a model record
   ls-files        List files in a model or adapter
@@ -242,6 +247,38 @@ tg beta endpoints shadow --endpoint ep_abc123 \
 
 Pass `--rate` or `--target-qps` (one is required). Stop with `rm exp_...`.
 
+## endpoints rollout
+
+Shifts the source deployment's traffic share to a target under the same endpoint. Prefer this
+over hand-edited `--traffic-weight` steps for live migrations. Full strategy and eligibility
+rules: [traffic-routing.md](traffic-routing.md) (Replace a deployment) and the
+[rollouts docs](https://docs.together.ai/docs/dedicated-endpoints/rollouts).
+
+```bash
+tg endpoints rollout dep_target456 --canary
+tg endpoints rollout dep_target456 --blue-green
+tg endpoints rollout dep_target456 --rolling
+
+# Capacity budgets (CLI 3.2.0+)
+tg endpoints rollout dep_target456 --canary --max-surge 2
+tg endpoints rollout dep_target456 --rolling --max-unavailable 1
+```
+
+| Flag | Description |
+| --- | --- |
+| `--source` | Active deployment (ID or name) to shift traffic away from. Inferred when exactly one other deployment is taking traffic. |
+| `--canary` / `--blue-green` / `--rolling` | Strategy (pick one). |
+| `--steps` / `--interval` | Canary traffic ladder and soak duration. |
+| `--max-surge` | Canary only. Max target replicas one step may add (1–1000). Omit for no limit. |
+| `--max-unavailable` | Max source replicas that may be missing/shut down before replacements are ready (0–1000; default `0`). Positive values admit a `DEGRADED` source within the budget. |
+| `--final-source-replicas` / `--final-target-replicas` | End-state replica counts. |
+| `--detach` | Detach the target from a shadow experiment or A/B test before starting. |
+| `--cancel` / `--pause` / `--resume` / `--promote` | Manage a running rollout. |
+
+A mid-run step that would exceed max surge pauses with `SURGE_BUDGET` — cancel and recreate
+with a larger surge or an intermediate ladder step. Neither deployment may have an inactivity
+timeout.
+
 ## models commands
 
 ```bash
@@ -251,6 +288,10 @@ tg beta models public --modality TEXT --search qwen
 
 # List configs published for a model (hardware, GPU count, optimization)
 tg beta models configs ml_CbJNwQC2ZqCU2iFT3mrCh
+
+# Get a config revision by ID (CLI 3.2.0+; `get` is optional when the ID is `cr_...`)
+tg models configs get cr_abc123
+tg models configs cr_abc123
 
 # Register a custom model or adapter record (name it bare, no org prefix)
 tg beta models create gemma-4-31b-it --base-model ml_CbJNwQC2ZqCU2iFT3mrCh

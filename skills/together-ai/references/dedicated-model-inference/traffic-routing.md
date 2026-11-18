@@ -10,6 +10,8 @@ traffic: weighted splits, A/B tests, and shadow experiments.
 - [Observing routing](#observing-routing)
 - [Traffic splits (weights)](#traffic-splits-weights)
 - [Replace a deployment (gradual cutover)](#replace-a-deployment-gradual-cutover)
+- [Capacity budgets](#capacity-budgets)
+- [Manual weight cutover](#manual-weight-cutover)
 - [A/B tests](#ab-tests)
 - [Shadow experiments](#shadow-experiments)
 - [Choosing a strategy](#choosing-a-strategy)
@@ -134,8 +136,43 @@ Semantics that trip people up:
 
 ## Replace a deployment (gradual cutover)
 
-To migrate an endpoint to a new model version, config, or hardware on live traffic, run both
-deployments side by side and shift traffic with weights and replica counts:
+To migrate an endpoint to a new model version, config, or hardware on live traffic, prefer a
+**rollout** (`tg endpoints rollout`) over editing weights by hand. Rollouts shift only the
+source's share to the target under the same endpoint, record history, and support canary,
+blue-green, and rolling strategies (see the
+[rollouts docs](https://docs.together.ai/docs/dedicated-endpoints/rollouts)).
+
+### Capacity budgets
+
+Optional caps on how many replicas a rollout adds or gives up at once (CLI 3.2.0+):
+
+- **`--max-surge`** (canary only): max target replicas each canary step may add, measured from
+  the previous step's replica count (or the target's current count for the first step).
+  Autoscaler-added replicas don't count. Creating the rollout fails if a step would need more;
+  a mid-run breach pauses with `SURGE_BUDGET` (cancel and recreate — no auto-retry). Range
+  1–1000; omit for no limit.
+- **`--max-unavailable`**: how many source replicas may be missing or shut down before their
+  replacements are ready. Default `0` waits for capacity and refuses a `DEGRADED` source. With
+  a positive value, a `DEGRADED` source short by up to that many replicas is allowed, and the
+  rollout may shut down source replicas to free same-GPU-type capacity for the target. The last
+  source replica keeps serving until all traffic has moved. Range 0–1000; valid with every
+  strategy.
+
+```bash
+# Cap canary growth at two target replicas per step
+tg endpoints rollout dep_target456 --canary --max-surge 2
+
+# Allow one source replica short (also admits a DEGRADED source within that budget)
+tg endpoints rollout dep_target456 --rolling --max-unavailable 1
+```
+
+Neither deployment may have an inactivity timeout. A `DEGRADED` source is only eligible when
+`--max-unavailable` is set; the console won't list degraded sources, so use the CLI for that
+case.
+
+### Manual weight cutover
+
+If you need a one-off hand-driven shift instead of a rollout:
 
 1. Create the new deployment on the **same endpoint**, sized for its eventual share, and wait
    for `READY`. It receives no traffic yet (weight unset).
@@ -284,7 +321,7 @@ lifetimes.
 | Goal | Tool |
 | --- | --- |
 | Serve two deployments for redundancy | Traffic split with weights. |
-| Replace a deployment on live traffic | Gradual cutover with `--traffic-weight` steps. |
+| Replace a deployment on live traffic | `tg endpoints rollout` (canary / blue-green / rolling); optional `--max-surge` / `--max-unavailable`. Manual `--traffic-weight` steps only when a rollout isn't appropriate. |
 | Measure a candidate on a fixed slice of user-visible traffic | A/B test. |
 | Test a candidate with zero user impact / warm it up | Shadow experiment. |
-| Ship the A/B or shadow winner | Delete the experiment, then shift weights to the winner. |
+| Ship the A/B or shadow winner | Delete the experiment, then run a rollout (or shift weights) to the winner. |

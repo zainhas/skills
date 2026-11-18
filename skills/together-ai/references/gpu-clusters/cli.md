@@ -81,14 +81,16 @@ tg beta clusters create [OPTIONS]
 | `--nvidia-driver-version` | string | NVIDIA driver version (use `clusters list-regions` for options) |
 | `--cuda-version` | string | CUDA version (use `clusters list-regions` for options) |
 | `--cluster-type` | enum | `KUBERNETES` or `SLURM` |
-| `--volume` | string | Existing storage volume ID to attach |
-| `--non-interactive` | -- | Skip interactive prompts. Required in CI. |
+| `--volume` | string | Existing storage volume ID to attach. Can't combine with `--shared-volume-name` / `--shared-volume-size-tib`. |
+| `--shared-volume-name` | string | Name for a new shared volume to create with the cluster (same region). Requires `--shared-volume-size-tib`. |
+| `--shared-volume-size-tib` | integer | Size of the new shared volume in TiB (min 1). Requires `--shared-volume-name`. |
+| `--non-interactive` | -- | Skip interactive prompts. Required in CI. Pass `--volume` or both shared-volume flags; without them the create has no volume. |
 | `--json` | -- | Output in JSON format |
 
 **Examples:**
 
 ```shell
-# On-demand Kubernetes cluster with H100s
+# On-demand Kubernetes cluster with H100s; create a new shared volume with the cluster
 tg beta clusters create \
   --name my-training-cluster \
   --num-gpus 8 \
@@ -98,9 +100,11 @@ tg beta clusters create \
   --nvidia-driver-version 560 \
   --billing-type ON_DEMAND \
   --cluster-type KUBERNETES \
+  --shared-volume-name my-training-data \
+  --shared-volume-size-tib 2 \
   --non-interactive
 
-# Reserved Slurm cluster with H200s and attached storage
+# Reserved Slurm cluster with H200s and an existing volume
 tg beta clusters create \
   --name my-slurm-cluster \
   --num-gpus 16 \

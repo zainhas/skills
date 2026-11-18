@@ -26,7 +26,12 @@ gang scheduling on a running cluster is `domains/kueue.md` or `domains/volcano.m
 
 - Prefer managed products unless the user explicitly needs raw infrastructure control.
 - Treat storage lifecycle separately from cluster lifecycle; volumes can outlive clusters.
-- When creating a cluster with new shared storage, prefer inline `shared_volume` over creating a volume separately and attaching via `volume_id`. Separately created volumes may land in a different datacenter partition than the cluster, causing a "does not exist in the datacenter" error even when the volume shows as available.
+- When creating a cluster with new shared storage, prefer inline `shared_volume` (SDK) or
+  `--shared-volume-name` + `--shared-volume-size-tib` (CLI) over creating a volume separately
+  and attaching via `volume_id` / `--volume`. Non-interactive CLI creates need one of those
+  volume options — prompts that offer to create a volume only run interactively. Separately
+  created volumes may land in a different datacenter partition than the cluster, causing a
+  "does not exist in the datacenter" error even when the volume shows as available.
 - GPU stock-outs (409 "Out of stock") are common. Always call `list_regions()` first and be prepared to try multiple regions.
 - The regions response reports supported configurations, not prices or
   guaranteed stock. Never infer the cheapest GPU from response order or
@@ -49,10 +54,10 @@ read just that section; long ones start with `## Contents`.
 
 | File | Lines | Contains | Open when |
 |---|---|---|---|
-| [references/gpu-clusters/pricing-and-discovery.md](references/gpu-clusters/pricing-and-discovery.md) | 82 | authoritative pricing and stock surfaces, read-only inventory commands, picking the cheapest live option, one-hour on-demand plan | pricing, availability, or a plan without provisioning |
+| [references/gpu-clusters/pricing-and-discovery.md](references/gpu-clusters/pricing-and-discovery.md) | 84 | authoritative pricing and stock surfaces, read-only inventory commands, picking the cheapest live option, one-hour on-demand plan | pricing, availability, or a plan without provisioning |
 | [scripts/gpu-clusters/manage_cluster.py](scripts/gpu-clusters/manage_cluster.py) (.ts) | 237 | create, poll, credentials, scale, delete | provisioning or changing a cluster |
 | [scripts/gpu-clusters/manage_storage.py](scripts/gpu-clusters/manage_storage.py) | 129 | create, list, resize, delete shared volumes | managing storage on its own |
-| [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 305 | `tg` cluster and storage commands, global flags, instance types, driver versions | a CLI flag or driver version |
+| [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 309 | `tg` cluster and storage commands, global flags (including `--shared-volume-name` / `--shared-volume-size-tib`), instance types, driver versions | a CLI flag or driver version |
 | [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 478 | cluster and storage endpoints, request fields, regions, instance types | an API field the script does not set |
 | [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 571 | architecture, access, Slurm config, GPU containers, scaling, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
 

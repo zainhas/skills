@@ -99,9 +99,11 @@ your own Docker runtime is `domains/dedicated-containers.md`; raw nodes are `dom
   This is the only way to verify a split or A/B empirically. See
   [traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) (Observing routing).
 - **To replace a deployment on live traffic**, create the new deployment on the same
-  endpoint, wait for `READY`, then shift traffic gradually with `--traffic-weight` (and
-  replica counts), watching the dashboard between steps. Take the old deployment out with
-  `--traffic-weight 0`, then scale it down and delete it.
+  endpoint, wait for `READY`, then run `tg endpoints rollout` (canary / blue-green /
+  rolling). Use `--max-surge` (canary) and `--max-unavailable` to cap replica churn; a
+  `DEGRADED` source is allowed only with a positive max unavailable. Prefer rollouts over
+  hand-edited `--traffic-weight` steps — see
+  [traffic-routing.md](references/dedicated-model-inference/traffic-routing.md).
 - The `client.beta.*` SDK surface and `together beta` CLI are **beta**: pin a current SDK
   release (`uv pip install --upgrade together`) and expect the surface to evolve.
 
@@ -132,9 +134,9 @@ only for the detail named in its row, and read just that section; each starts wi
 |---|---|---|---|
 | [scripts/dedicated-model-inference/deploy_model.py](scripts/dedicated-model-inference/deploy_model.py) | 254 | SDK path: deploy, poll to READY, infer on the dedicated base URL, scale, clean up | scripting the lifecycle in Python |
 | [scripts/dedicated-model-inference/upload_custom_model.py](scripts/dedicated-model-inference/upload_custom_model.py) | 145 | upload custom weights or a LoRA adapter, then deploy | serving your own weights |
-| [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 297 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`; what the CLI cannot do | a CLI flag or subcommand |
+| [references/dedicated-model-inference/cli-reference.md](references/dedicated-model-inference/cli-reference.md) | 338 | every `tg beta endpoints` and `models` command and flag: deploy, get, update, rm, `ab`, `shadow`, `rollout` (capacity budgets); what the CLI cannot do | a CLI flag or subcommand |
 | [references/dedicated-model-inference/api-reference.md](references/dedicated-model-inference/api-reference.md) | 478 | SDK and REST for endpoints and deployments: states, autoscaling and scaling metrics, stop/restart, routing, deletion, Prometheus monitoring, Events Feed | SDK calls, metrics, or the events feed |
-| [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 290 | how weights route, stickiness, observing routing via headers, gradual cutover, A/B tests, shadow experiments | traffic splits, A/B, or shadow |
+| [references/dedicated-model-inference/traffic-routing.md](references/dedicated-model-inference/traffic-routing.md) | 327 | how weights route, stickiness, observing routing via headers, rollouts and capacity budgets, gradual cutover, A/B tests, shadow experiments | traffic splits, rollouts, A/B, or shadow |
 | [references/dedicated-model-inference/models-and-configs.md](references/dedicated-model-inference/models-and-configs.md) | 358 | choosing a model, deployment profiles, configs, hardware pricing, model and LoRA upload, upload troubleshooting | picking a profile or uploading weights |
 
 ## Docs

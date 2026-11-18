@@ -71,6 +71,8 @@ tg beta clusters create \
   --cuda-version <LIVE_CUDA_VERSION> \
   --billing-type ON_DEMAND \
   --cluster-type KUBERNETES \
+  --shared-volume-name one-hour-storage \
+  --shared-volume-size-tib 1 \
   --non-interactive \
   --json
 
