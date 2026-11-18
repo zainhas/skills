@@ -27,6 +27,7 @@ read both.
 | MiniMax M3 | `MiniMaxAI/MiniMax-M3` | Hybrid (on by default) | 512K | Yes |
 | Qwen3.6 Plus | `Qwen/Qwen3.6-Plus` | Hybrid (on by default) | 1M | No |
 | Qwen3.5 9B | `Qwen/Qwen3.5-9B` | Hybrid (on by default) | 262K | Yes |
+| Qwen4 Max | `Qwen/Qwen4-Max` | Hybrid (on by default) | 1M | Yes |
 | GPT-OSS 120B | `openai/gpt-oss-120b` | Adjustable effort | 128K | Yes |
 
 **Type definitions:**
@@ -110,6 +111,7 @@ Hybrid models support `reasoning={"enabled": True/False}` to toggle reasoning on
 - `deepseek-ai/DeepSeek-V4-Pro-0813` (on by default)
 - `Qwen/Qwen3.5-9B` (on by default)
 - `Qwen/Qwen3.6-Plus` (on by default)
+- `Qwen/Qwen4-Max` (on by default)
 - `moonshotai/Kimi-K3` (on by default)
 - `zai-org/GLM-5.2` (on by default)
 

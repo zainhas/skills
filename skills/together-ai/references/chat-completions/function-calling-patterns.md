@@ -837,5 +837,6 @@ Serverless models that support this as of 2026-10-07, per the [serverless catalo
 - `thinkingmachines/Inkling`
 - `MiniMaxAI/MiniMax-M3`
 - `Qwen/Qwen3.5-9B`
+- `Qwen/Qwen4-Max`
 - `openai/gpt-oss-120b`
 - `meta-llama/Llama-3.3-70B-Instruct-Turbo`
