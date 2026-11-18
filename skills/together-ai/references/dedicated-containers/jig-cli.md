@@ -251,6 +251,9 @@ curl https://api.together.ai/v1/deployment-request/my-deployment/health \
   -H "Authorization: Bearer $TOGETHER_API_KEY"
 ```
 
+For the alpha request-routing layer (session affinity, replica pinning, gRPC, WebSockets, and
+routing errors), see [request-routing.md](request-routing.md). Queue jobs do not use that layer.
+
 ### Queue Submit Request
 
 | Field | Type | Required | Description |
@@ -434,8 +437,8 @@ model = load_model(device=device)
 | `min_replicas` | int | `1` | Min replicas (0 for scale-to-zero) |
 | `max_replicas` | int | `1` | Max replicas |
 | `port` | int | `8000` | Container listen port |
-| `health_check_path` | string | `"/health"` | Health endpoint (must return 200 when ready) |
-| `termination_grace_period_seconds` | int | `300` | Shutdown timeout for in-flight jobs |
+| `health_check_path` | string | `"/health"` | Health endpoint (must return 200 when ready). For gRPC-only servers, set `"/grpc.health.v1.Health"` so readiness uses the standard gRPC health service |
+| `termination_grace_period_seconds` | int | `300` | Shutdown timeout for in-flight jobs (and routed requests after SIGTERM) |
 | `command` | string[] | `null` | Override startup command at deploy time (e.g., `["python", "app.py", "--queue"]`) |
 
 ### `[tool.jig.deploy.environment_variables]`
