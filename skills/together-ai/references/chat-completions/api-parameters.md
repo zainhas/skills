@@ -85,7 +85,8 @@ console.log(response.choices[0].message.content);
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `stream` | bool | false | Stream tokens as Server-Sent Events |
-| `logprobs` | integer | - | Return top-k token log probs (0-20) |
+| `logprobs` | bool | false | Return per-token log probabilities. Pass `true` (integer form is rejected) |
+| `top_logprobs` | integer | - | When `logprobs` is true, return this many top alternatives per token (0-20). In the Python SDK, pass via `extra_body={"top_logprobs": N}` |
 | `echo` | bool | false | Include prompt in response |
 | `logit_bias` | object | - | Token ID to bias value mapping |
 

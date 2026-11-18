@@ -254,7 +254,9 @@ curl -X POST "https://api.together.xyz/v1/chat/completions" \
 
 ### 3. regex (Pattern Matching)
 
-Constrains output to match a regex pattern. All models supported for JSON mode also support regex.
+Constrains output to match a regex pattern. Many models that support JSON mode also support regex
+mode; a model that does not returns a `400` error. Prefer a known-good regex model such as
+`Qwen/Qwen3.5-9B` (disable thinking with `reasoning={"enabled": False}`).
 
 ### Python
 
@@ -265,7 +267,8 @@ client = Together()
 
 # Sentiment classification
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    model="Qwen/Qwen3.5-9B",
+    reasoning={"enabled": False},
     temperature=0.2,
     max_tokens=10,
     messages=[
@@ -281,7 +284,8 @@ print(response.choices[0].message.content)  # "positive"
 
 # Phone number pattern
 response = client.chat.completions.create(
-    model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    model="Qwen/Qwen3.5-9B",
+    reasoning={"enabled": False},
     messages=[{"role": "user", "content": "Generate a US phone number for a pizza shop"}],
     response_format={"type": "regex", "pattern": r"\(\d{3}\) \d{3}-\d{4}"},
 )
@@ -294,7 +298,8 @@ import Together from "together-ai";
 const together = new Together();
 
 const completion = await together.chat.completions.create({
-  model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  model: "Qwen/Qwen3.5-9B",
+  reasoning: { enabled: false },
   temperature: 0.2,
   max_tokens: 10,
   messages: [
@@ -322,7 +327,8 @@ curl -X POST "https://api.together.xyz/v1/chat/completions" \
   -H "Authorization: Bearer $TOGETHER_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "model": "Qwen/Qwen3.5-9B",
+    "reasoning": {"enabled": false},
     "temperature": 0.2,
     "max_tokens": 10,
     "messages": [
