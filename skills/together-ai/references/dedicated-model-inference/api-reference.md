@@ -381,8 +381,10 @@ deployment).
 DMI records latency, throughput, replica-count, and utilization metrics for every endpoint
 and deployment — the same series that drive autoscaling. Three surfaces:
 
-- **Analytics dashboard** — `https://api.together.ai/endpoints` shows per-endpoint charts.
-  Use it to monitor at a glance and to compare deployments during a cutover or A/B test.
+- **Analytics dashboard** — per-endpoint charts on the endpoint **Analytics** tab at
+  `https://api.together.ai/endpoints` (Usage/Errors, Total or By deployment). For traffic
+  across every dedicated endpoint in the project, use the **Dedicated** tab of the project
+  Analytics dashboard at `https://api.together.ai/analytics`.
 - **Events feed** — the audit trail of lifecycle changes (below).
 - **Prometheus-compatible metrics endpoint** (beta) — org-scoped scrape target for your own
   Prometheus/Grafana/Datadog stack (below).
