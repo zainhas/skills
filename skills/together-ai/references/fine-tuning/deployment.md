@@ -296,7 +296,7 @@ curl -X DELETE "https://api.together.xyz/v1/fine-tunes/ft-abc123" \
 
 ## Continued Fine-tuning
 
-Resume from a previous job's checkpoint:
+Resume from a previous job's checkpoint with `from_checkpoint`:
 
 ```python
 response = client.fine_tuning.create(
@@ -305,6 +305,14 @@ response = client.fine_tuning.create(
     from_checkpoint=previous_job_id,
 )
 ```
+
+When the previous job is LoRA, the new job either continues the same adapter or merges it
+into the base weights and trains on the merged result. Continuing requires the LoRA shape
+settings to match the previous job: `lora_r`, `lora_alpha`, `lora_dropout`, and
+`lora_trainable_modules`. For a vision-language model, `train_vision` must match too,
+because it decides whether the adapter covers the vision encoder. Any differing value
+triggers a merge instead. To guarantee a continuation, omit the training type and those
+settings on the new job so it inherits them from the previous job.
 
 ## Pricing
 
