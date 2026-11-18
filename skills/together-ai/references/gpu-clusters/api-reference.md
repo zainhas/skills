@@ -405,6 +405,7 @@ together beta clusters storage delete <VOLUME_ID>
 | `H100_SXM_INF` | NVIDIA H100 | 80GB | Inference-optimized, lower IB bandwidth |
 | `H200_SXM` | NVIDIA H200 | 141GB | InfiniBand networking |
 | `B200_SXM` | NVIDIA B200 | 192GB | InfiniBand networking |
+| `GB200_NVL` | NVIDIA GB200 | — | NVL72; use `GB200_NVL` (not `GB200_SXM`). Availability varies by region |
 | `L40_PCIE` | NVIDIA L40 | 48GB | PCIe |
 | `RTX_6000_PCI` | NVIDIA RTX 6000 | 24GB | PCIe |
 
