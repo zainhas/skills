@@ -7,6 +7,7 @@
   - [Startup Scripts (Slinky v1.0 only)](#startup-scripts-slinky-v10-only)
 - [GPU Access in Containers](#gpu-access-in-containers)
 - [Scaling](#scaling)
+- [Preemptible compute](#preemptible-compute)
 - [Storage](#storage)
 - [Health Checks](#health-checks)
 - [User Management](#user-management)
@@ -251,6 +252,26 @@ sudo scontrol update NodeName=<node_name> State=drain Reason="scaling down"
 ### Combining Capacity
 
 Use reserved for baseline + on-demand for bursts.
+
+## Preemptible compute
+
+Add a preemptible GPU target alongside standard capacity (`num_preemptible_gpus`,
+multiple of 8; `project_id` required when the target is greater than 0). The
+clusters API reports progress with these response fields:
+
+| Field | Meaning |
+|-------|---------|
+| `desired_preemptible_gpus` | Current preemptible GPU target (read-only). |
+| `allocated_preemptible_gpus` | Preemptible GPUs currently allocated, **including GPUs on nodes that are still starting**. Rises toward the target as Together allocates capacity; can stay below the target when capacity is tight. |
+
+In the console, set **Maximum preemptible GPUs** to the target (create or Scale).
+**Preemptible Nodes** on the clusters list or details page shows
+`ready/allocated (max N)` while fewer nodes are allocated than the target. For
+example, `1/2 (max 3)` means one node is ready, a second is allocated and still
+starting, and the target is three nodes. While a node drains after a reclaim or
+scale-down, ready can exceed allocated (`2/1 (max 2)`).
+
+Details: [Preemptible compute](https://docs.together.ai/docs/preemptible-compute).
 
 ## Storage
 
