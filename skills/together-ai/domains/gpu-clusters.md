@@ -26,6 +26,7 @@ gang scheduling on a running cluster is `domains/kueue.md` or `domains/volcano.m
 
 - Prefer managed products unless the user explicitly needs raw infrastructure control.
 - Treat storage lifecycle separately from cluster lifecycle; volumes can outlive clusters.
+- Together Storage Accelerator (TSA) is a free add-on that caches reads from S3-compatible object storage and Hugging Face Hub on the cluster's GPU-node NVMe. The first read of an object fetches it from the origin once per cluster; later reads are served from local NVMe. Open `cluster-management.md` (Storage Accelerator) for enablement, the in-cluster endpoint, path rules, and limits.
 - When creating a cluster with new shared storage, prefer inline `shared_volume` over creating a volume separately and attaching via `volume_id`. Separately created volumes may land in a different datacenter partition than the cluster, causing a "does not exist in the datacenter" error even when the volume shows as available.
 - GPU stock-outs (409 "Out of stock") are common. Always call `list_regions()` first and be prepared to try multiple regions.
 - The regions response reports supported configurations, not prices or
@@ -54,13 +55,14 @@ read just that section; long ones start with `## Contents`.
 | [scripts/gpu-clusters/manage_cluster.py](scripts/gpu-clusters/manage_cluster.py) (.ts) | 330 | create (requires `--shared-volume-name` with `--shared-volume-size-tib`, or `--volume-id`; takes the driver from the region's list unless you pass `--nvidia-version-id` or `--driver-version`), poll, scale, delete | provisioning or changing a cluster |
 | [scripts/gpu-clusters/manage_storage.py](scripts/gpu-clusters/manage_storage.py) | 129 | create, list, resize, delete shared volumes | managing storage on its own |
 | [references/gpu-clusters/cli.md](references/gpu-clusters/cli.md) | 343 | `tg` cluster and storage commands, create flags (`--nvidia-version-id`, `--os`, shared-volume flags), global flags, instance types, driver versions | a CLI flag or driver version |
-| [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 477 | cluster and storage endpoints, request fields, regions, instance types | an API field the script does not set |
-| [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 571 | architecture, access, Slurm config, GPU containers, scaling, storage, health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster |
+| [references/gpu-clusters/api-reference.md](references/gpu-clusters/api-reference.md) | 493 | cluster, storage, and TSA add-on endpoints, request fields, regions, instance types | an API field the script does not set |
+| [references/gpu-clusters/cluster-management.md](references/gpu-clusters/cluster-management.md) | 641 | architecture, access, Slurm config, GPU containers, scaling, storage, Storage Accelerator (TSA), health checks, users, billing, troubleshooting, Terraform | operating or debugging a running cluster, or enabling TSA |
 
 ## Docs
 
 - [GPU Clusters Overview](https://docs.together.ai/docs/gpu-clusters-overview)
 - [GPU Clusters Quickstart](https://docs.together.ai/docs/gpu-clusters-quickstart)
+- [Together Storage Accelerator](https://docs.together.ai/docs/storage-accelerator)
 - [Clusters API](https://docs.together.ai/reference/clusters-create)
 - [GPU Cluster Pricing](https://www.together.ai/pricing#gpu-clusters) (rates)
 - [GPU Clusters Billing](https://docs.together.ai/docs/gpu-clusters-billing) (billing rules)

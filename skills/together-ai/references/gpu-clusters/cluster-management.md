@@ -8,6 +8,7 @@
 - [GPU Access in Containers](#gpu-access-in-containers)
 - [Scaling](#scaling)
 - [Storage](#storage)
+  - [Together Storage Accelerator (TSA)](#together-storage-accelerator-tsa)
 - [Health Checks](#health-checks)
 - [User Management](#user-management)
 - [Billing](#billing)
@@ -351,6 +352,75 @@ spec:
       persistentVolumeClaim:
         claimName: shared-pvc
 ```
+
+### Together Storage Accelerator (TSA)
+
+Free add-on that caches reads from S3-compatible object storage and Hugging Face Hub on
+GPU-node local NVMe. One origin fetch per object per cluster; later reads (any node) are served
+from the cluster-wide cache. Built on ASTRA. Docs:
+[Together Storage Accelerator](https://docs.together.ai/docs/storage-accelerator).
+
+**Enable:** Toggle TSA in the console (cluster create or details), or create the add-on via API.
+Org enablement is required; contact the account team if the TSA section is missing. Up to three
+S3-compatible backends plus one Hugging Face token per cluster. Give backends read-only
+credentials: the in-cluster endpoint does not authenticate clients.
+
+```bash
+# addOnType is currently `cs3` (API rename to `tsa` pending)
+curl -X POST "https://api.together.ai/v1/compute/clusters/${CLUSTER_ID}/addons" \
+  -H "Authorization: Bearer $TOGETHER_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "tsa",
+    "addOnType": "cs3",
+    "config": {
+      "tsa": {
+        "enabled": true,
+        "backends": [{
+          "name": "training-data",
+          "url": "https://s3.us-west-2.amazonaws.com",
+          "region": "us-west-2",
+          "accessKeyId": "ACCESS_KEY_ID",
+          "secretAccessKey": "SECRET_ACCESS_KEY"
+        }],
+        "hfToken": "HF_TOKEN"
+      }
+    }
+  }'
+```
+
+Update backends with `PUT /v1/compute/clusters/{cluster_id}/addons/{addon_id}` (omit credential
+fields to keep stored values). Confirm install: `kubectl -n tsa get daemonset,pods` (one pod per
+GPU node; pods appear when the first GPU node joins).
+
+**In-cluster endpoint:** `http://tsa.tsa.svc.cluster.local:18080` (not exposed outside the
+cluster; pods use the host network). Path-style only: `BACKEND_NAME/BUCKET/KEY`. Client AWS
+credentials are unused; TSA signs origin requests with the configured backend credentials.
+
+```yaml
+env:
+  - name: AWS_ENDPOINT_URL
+    value: "http://tsa.tsa.svc.cluster.local:18080"
+  - name: AWS_ACCESS_KEY_ID
+    value: "unused"
+  - name: AWS_SECRET_ACCESS_KEY
+    value: "unused"
+  # Hugging Face Hub mirror (requires hfToken on the add-on):
+  - name: HF_ENDPOINT
+    value: "http://tsa.tsa.svc.cluster.local:18080"
+```
+
+Prefetch before a job: `POST http://tsa.tsa.svc.cluster.local:18080/prefetch/BACKEND_NAME/BUCKET/KEY`.
+Health: `GET .../health`. Prometheus metrics on each GPU node at `:9091/metrics`.
+
+**Hard rules:**
+- Caches `GET`/`HEAD` (including range). Listings, uploads, and multipart uploads are not cached;
+  write to the origin directly. A plain `PUT`/`DELETE` through the endpoint passes through with
+  the backend credentials.
+- Prefer immutable keys (weights, datasets, versioned checkpoints). Overwriting the same origin
+  key can serve stale or mixed bytes until eviction; use a new key or `Cache-Control: no-store`.
+- Limits: three backends + one HF token; path-style addressing only; no container-image caching
+  or bulk ingest into shared volumes.
 
 ## Health Checks
 

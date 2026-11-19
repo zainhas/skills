@@ -3,6 +3,7 @@
 
 - [Cluster Endpoints](#cluster-endpoints)
 - [Storage Endpoints](#storage-endpoints)
+- [Add-on Endpoints (TSA)](#add-on-endpoints-tsa)
 - [Create Cluster](#create-cluster)
 - [List Clusters](#list-clusters)
 - [Get Cluster](#get-cluster)
@@ -43,6 +44,21 @@ Base URL: `https://api.together.xyz/v1`
 | `GET /compute/clusters/storage/volumes/{id}` | Get volume | Get volume details |
 | `PUT /compute/clusters/storage/volumes` | Update volume | Resize a volume |
 | `DELETE /compute/clusters/storage/volumes/{id}` | Delete volume | Remove a volume |
+
+## Add-on Endpoints (TSA)
+
+Together Storage Accelerator (TSA) is created as a cluster add-on. Credentials are accepted once
+and returned masked. Current `addOnType` is `cs3` (rename to `tsa` pending). See
+[cluster-management.md](cluster-management.md#together-storage-accelerator-tsa) for the
+in-cluster endpoint and path rules.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST /compute/clusters/{id}/addons` | Create add-on | Enable TSA (`addOnType: "cs3"`, `config.tsa`) |
+| `PUT /compute/clusters/{id}/addons/{addon_id}` | Update add-on | Change backends or HF token (omit credential fields to keep stored values) |
+
+`config.tsa` fields: `enabled` (bool), `backends` (up to three: `name`, `url`, `region`,
+`accessKeyId`, `secretAccessKey`), `hfToken` (optional Hugging Face Hub mirror).
 
 ## Create Cluster
 
