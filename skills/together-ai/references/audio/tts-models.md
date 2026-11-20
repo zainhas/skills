@@ -18,6 +18,7 @@ These models are current in the latest text-to-speech guide and are not listed i
 |-------|-----------|--------|-----------|-----------------|
 | Orpheus 3B | `canopylabs/orpheus-3b-0.1-ft` | Serverless | REST, Streaming, WebSocket | $15 per 1M characters |
 | Kokoro | `hexgrad/Kokoro-82M` | Serverless | REST, Streaming, WebSocket | $4 per 1M characters |
+| Qwen3 TTS 12Hz 1.7B | `Qwen/Qwen3-TTS-12Hz-1.7B` | Serverless | REST, Streaming, WebSocket | $20 per 1M characters; nine preset voices; style instructions via `extra_params.instructions` |
 | Cartesia Sonic 3 | `cartesia/sonic-3` | Serverless / Dedicated / Reserved | REST | Build Tier 2+ |
 | Cartesia Sonic 2 | `cartesia/sonic-2` | Serverless / Dedicated / Reserved | REST | $65 per 1M characters, Build Tier 2+ |
 | Cartesia Sonic | `cartesia/sonic` | Serverless | REST | Listed in `/audio/speech` reference enum |
@@ -32,6 +33,9 @@ These models are current in the latest text-to-speech guide and are not listed i
 
 Notes:
 - Orpheus and Kokoro support realtime WebSocket streaming for the lowest-latency TTS flows.
+- `Qwen/Qwen3-TTS-12Hz-1.7B` supports `wav`, `mp3`, `raw`, and `mulaw` only (not `opus`/`aac`/`flac`);
+  `sample_rate` is `24000` (default) or `8000`; `alignment=word` is not supported. Each preset voice
+  speaks Chinese, English, French, German, Italian, Japanese, Korean, Portuguese, Russian, and Spanish.
 - Cartesia Sonic 2 and Sonic 3 require Build Tier 2 or higher on serverless and are also available on Dedicated and
   Reserved Endpoints.
 - The `/audio/speech` API reference currently enumerates `cartesia/sonic`, `hexgrad/Kokoro-82M`, and
@@ -53,17 +57,23 @@ Use `/v1/audio/speech` for standard HTTP generation.
 | `segment` | string | No | `sentence`, `immediate`, or `never` |
 | `response_encoding` | string | No | `pcm_f32le`, `pcm_s16le`, `pcm_mulaw`, `pcm_alaw` |
 | `stream` | bool | No | Stream as SSE instead of waiting for the full file |
+| `extra_params` | object | No | Model-specific fields; see `extra_params.*` rows |
+| `extra_params.pronunciation_dict` | array | No | Pronunciation rules as `"source/replacement"` strings |
+| `extra_params.seed` | int | No | With `Qwen/Qwen3-TTS-12Hz-1.7B`, same input/voice/seed usually repeat; best-effort |
+| `extra_params.instructions` | string | No | Style instruction (emotion, tone, pace) for Qwen3 TTS preset voices; max 500 characters |
 
 Current behavior from the docs and reference:
 - `response_format` defaults to `wav`
 - when `stream=true`, the only supported HTTP `response_format` is `raw`
 - `alignment=word` is only supported on streaming requests
 - `/audio/speech` documents default sample rates of `24000` for Orpheus/Kokoro and `44100` for `cartesia/sonic`
+- Qwen3 TTS style instructions also work with `stream: true`. In the Python SDK pass them as
+  `extra_body={"extra_params": {"instructions": "..."}}` (and optionally `"seed": N`)
 
 SDK response types (Python SDK):
 - Non-streaming: `client.audio.speech.create()` returns a `BinaryAPIResponse`. Save with `response.write_to_file(path)`.
 - Streaming (`stream=True`): returns a `Stream[AudioSpeechStreamChunk]`. Iterate chunks, check `chunk.type`, and use `base64.b64decode(chunk.delta)` for `conversation.item.audio_output.delta` events.
-- The SDK `create()` method accepts: `model`, `input`, `voice`, `language`, `response_encoding`, `response_format`, `sample_rate`, `stream`. Pass `alignment` and `segment` via `extra_body={"alignment": ..., "segment": ...}`.
+- The SDK `create()` method accepts: `model`, `input`, `voice`, `language`, `response_encoding`, `response_format`, `sample_rate`, `stream`. Pass `alignment`, `segment`, and `extra_params` via `extra_body`.
 
 ## Streaming HTTP
 
@@ -113,8 +123,12 @@ The guide and reference document these query parameters:
 | `language` | string | Language code such as `en`, `fr`, `es` |
 | `alignment` | string | `none` or `word` |
 | `segment` | string | `sentence`, `immediate`, or `never` |
+| `instructions` | string | Style instruction for `Qwen/Qwen3-TTS-12Hz-1.7B` (up to 500 characters); URL query or `tts_session.updated` |
+| `extra_params` | object | Model-specific fields (`pronunciation_dict`, `seed`, `instructions`); **only** via `tts_session.updated` |
 
-You can pass these in the URL or update them later with `tts_session.updated`.
+You can pass these parameters, except `extra_params`, as URL query parameters or later with
+`tts_session.updated`. Nested query forms such as `extra_params[instructions]` are ignored without
+an error; put a style instruction in the URL as the top-level `instructions` parameter.
 
 ### Client Events
 
@@ -181,6 +195,14 @@ curl -X GET "https://api.together.ai/v1/voices?model=canopylabs/orpheus-3b-0.1-f
 ### Orpheus
 
 `tara`, `leah`, `jess`, `leo`, `dan`, `mia`, `zac`, `zoe`
+
+### Qwen3 TTS 12Hz 1.7B
+
+`vivian`, `serena`, `uncle_fu`, `dylan`, `eric`, `ryan`, `aiden`, `ono_anna`, `sohee`
+
+Native languages: `vivian`/`serena`/`uncle_fu` Chinese; `dylan` Chinese (Beijing); `eric` Chinese
+(Sichuan); `ryan`/`aiden` English; `ono_anna` Japanese; `sohee` Korean. Every voice still speaks all
+ten supported languages listed in the model catalog notes.
 
 ### Kokoro
 
