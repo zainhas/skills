@@ -18,9 +18,7 @@ These models are current in the latest text-to-speech guide and are not listed i
 |-------|-----------|--------|-----------|-----------------|
 | Orpheus 3B | `canopylabs/orpheus-3b-0.1-ft` | Serverless | REST, Streaming, WebSocket | $15 per 1M characters |
 | Kokoro | `hexgrad/Kokoro-82M` | Serverless | REST, Streaming, WebSocket | $4 per 1M characters |
-| Cartesia Sonic 3 | `cartesia/sonic-3` | Serverless / Dedicated / Reserved | REST | Build Tier 2+ |
-| Cartesia Sonic 2 | `cartesia/sonic-2` | Serverless / Dedicated / Reserved | REST | $65 per 1M characters, Build Tier 2+ |
-| Cartesia Sonic | `cartesia/sonic` | Serverless | REST | Listed in `/audio/speech` reference enum |
+| Cartesia Sonic 3 | `cartesia/sonic-3` | Serverless / Dedicated / Reserved | REST | $65 per 1M characters, Build Tier 2+ |
 | Deepgram Aura 2 | `deepgram/deepgram-aura-2` | Dedicated / Reserved | REST, Streaming, WebSocket | Dedicated only |
 | Rime Arcana v3 Turbo | `rime-labs/rime-arcana-v3-turbo` | Dedicated / Reserved | REST, Streaming, WebSocket | Dedicated only |
 | Rime Arcana v3 | `rime-labs/rime-arcana-v3` | Dedicated / Reserved | REST, Streaming, WebSocket | Dedicated only |
@@ -32,8 +30,8 @@ These models are current in the latest text-to-speech guide and are not listed i
 
 Notes:
 - Orpheus and Kokoro support realtime WebSocket streaming for the lowest-latency TTS flows.
-- Cartesia Sonic 2 and Sonic 3 require Build Tier 2 or higher on serverless and are also available on Dedicated and
-  Reserved Endpoints.
+- Cartesia Sonic 3 requires Build Tier 2 or higher on serverless and is also available on Dedicated and
+  Reserved Endpoints. The serverless audio catalog no longer lists `cartesia/sonic` or `cartesia/sonic-2`.
 - The `/audio/speech` API reference currently enumerates `cartesia/sonic`, `hexgrad/Kokoro-82M`, and
   `canopylabs/orpheus-3b-0.1-ft` in the request schema.
 
@@ -58,7 +56,7 @@ Current behavior from the docs and reference:
 - `response_format` defaults to `wav`
 - when `stream=true`, the only supported HTTP `response_format` is `raw`
 - `alignment=word` is only supported on streaming requests
-- `/audio/speech` documents default sample rates of `24000` for Orpheus/Kokoro and `44100` for `cartesia/sonic`
+- `/audio/speech` documents default sample rates of `24000` for Orpheus/Kokoro and `44100` for Cartesia Sonic models
 
 SDK response types (Python SDK):
 - Non-streaming: `client.audio.speech.create()` returns a `BinaryAPIResponse`. Save with `response.write_to_file(path)`.

@@ -39,8 +39,8 @@ translation, diarization, timestamps, realtime). Serverless TTS includes `hexgra
 | [scripts/audio/tts_websocket.py](scripts/audio/tts_websocket.py) | 137 | realtime TTS over WebSocket | live or conversational speech |
 | [scripts/audio/stt_transcribe.py](scripts/audio/stt_transcribe.py) (.ts) | 221 | transcription, translation, diarization, timestamps | transcribing files |
 | [scripts/audio/stt_realtime.py](scripts/audio/stt_realtime.py) | 125 | realtime STT over WebSocket | live captions or voice input |
-| [references/audio/tts-models.md](references/audio/tts-models.md) | 227 | TTS models, REST and streaming parameters, WebSocket protocol, voice lists | choosing a voice or TTS parameter |
-| [references/audio/stt-models.md](references/audio/stt-models.md) | 303 | STT models, input formats, limits, response formats, realtime protocol, errors | an STT parameter, limit, or error |
+| [references/audio/tts-models.md](references/audio/tts-models.md) | 225 | TTS models, REST and streaming parameters, WebSocket protocol, voice lists | choosing a voice or TTS parameter |
+| [references/audio/stt-models.md](references/audio/stt-models.md) | 304 | STT models, input formats, limits, response formats, realtime protocol, errors | an STT parameter, limit, or error |
 
 ## Docs
 
