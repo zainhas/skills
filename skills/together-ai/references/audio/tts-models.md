@@ -20,7 +20,7 @@ These models are current in the latest text-to-speech guide and are not listed i
 | Kokoro | `hexgrad/Kokoro-82M` | Serverless | REST, Streaming, WebSocket | $4 per 1M characters |
 | Cartesia Sonic 3 | `cartesia/sonic-3` | Serverless / Dedicated / Reserved | REST | Build Tier 2+ |
 | Cartesia Sonic 2 | `cartesia/sonic-2` | Serverless / Dedicated / Reserved | REST | $65 per 1M characters, Build Tier 2+ |
-| Cartesia Sonic | `cartesia/sonic` | Serverless | REST | Listed in `/audio/speech` reference enum |
+| Cartesia Sonic | `cartesia/sonic` | Serverless | REST | $65 per 1M characters |
 | Deepgram Aura 2 | `deepgram/deepgram-aura-2` | Dedicated / Reserved | REST, Streaming, WebSocket | Dedicated only |
 | Rime Arcana v3 Turbo | `rime-labs/rime-arcana-v3-turbo` | Dedicated / Reserved | REST, Streaming, WebSocket | Dedicated only |
 | Rime Arcana v3 | `rime-labs/rime-arcana-v3` | Dedicated / Reserved | REST, Streaming, WebSocket | Dedicated only |
@@ -32,6 +32,8 @@ These models are current in the latest text-to-speech guide and are not listed i
 
 Notes:
 - Orpheus and Kokoro support realtime WebSocket streaming for the lowest-latency TTS flows.
+- The serverless audio models table lists `cartesia/sonic`, `cartesia/sonic-2`, and `cartesia/sonic-3` at
+  $65 per 1M characters.
 - Cartesia Sonic 2 and Sonic 3 require Build Tier 2 or higher on serverless and are also available on Dedicated and
   Reserved Endpoints.
 - The `/audio/speech` API reference currently enumerates `cartesia/sonic`, `hexgrad/Kokoro-82M`, and
